@@ -30,4 +30,8 @@ class Department extends Model
     {
         return $this->hasMany(DropboxAccount::class);
     }
+    public function files()
+    {
+        return $this->hasManyThrough(File::class, DropboxAccount::class);
+    }
 }

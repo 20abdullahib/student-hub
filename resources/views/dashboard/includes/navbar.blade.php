@@ -108,6 +108,11 @@
                                 <span class="sidebar-text">Upload Files</span>
                             </a>
                         </li>
+                        <li class="nav-item ">
+                            <a class="nav-link" href="{{ route('dropbox.files.index') }}">
+                                <span class="sidebar-text">Files</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </li>

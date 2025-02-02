@@ -115,6 +115,31 @@ class DropboxController extends Controller
         return response()->json(['message' => 'File details saved']);
     }
 
+    public function listFiles(Request $request)
+    {
+        $files = File::with(['subject', 'dropboxAccount.department'])
+            ->when($request->file_name, function ($query, $fileName) {
+                return $query->where('name', 'like', "%$fileName%");
+            })
+            ->when($request->subject_name, function ($query, $subjectName) {
+                return $query->whereHas('subject', function ($q) use ($subjectName) {
+                    $q->where('name', 'like', "%$subjectName%");
+                });
+            })
+            ->when($request->department_name, function ($query, $departmentName) {
+                return $query->whereHas('dropboxAccount.department', function ($q) use ($departmentName) {
+                    $q->where('name', 'like', "%$departmentName%");
+                });
+            })
+            ->paginate(25);
+    
+        return view('dashboard.pages.dropbox.files', [
+            'files' => $files,
+            'subjects' => Subject::all(),
+            'departments' => Department::all(),
+        ]);
+    }
+
     public function getAccountForUpload(Request $request)
     {
         $subject = Subject::findOrFail($request->subject_id);

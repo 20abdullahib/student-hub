@@ -27,4 +27,9 @@ class DropboxAccount extends Model
     {
         return $this->belongsTo(Department::class);
     }
+
+    public function files()
+    {
+        return $this->hasMany(File::class);
+    }
 }
