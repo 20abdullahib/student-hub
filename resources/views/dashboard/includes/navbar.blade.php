@@ -94,6 +94,11 @@
                 <div class="multi-level collapse " role="list" id="Dropbox" aria-expanded="false">
                     <ul class="flex-column nav">
                         <li class="nav-item ">
+                            <a class="nav-link" href="{{ route('dropbox.account.index') }}">
+                                <span class="sidebar-text">Accounts</span>
+                            </a>
+                        </li>
+                        <li class="nav-item ">
                             <a class="nav-link" href="{{ route('dropbox.account.form') }}">
                                 <span class="sidebar-text">New Account</span>
                             </a>

@@ -46,9 +46,11 @@ Route::prefix('dashboard/dropbox')->group(function () {
     Route::get('/upload', [DropboxController::class, 'showUploadForm'])->name('dropbox.upload.form');
     
     // Account Operations
-    Route::post('/account/setup', [DropboxController::class, 'setupAccount'])->name('dropbox.account.setup');
-    Route::post('/account/update', [DropboxController::class, 'updateDropbox'])->name('dropbox.account.update');
-    
+     Route::get('/accounts', [DropboxController::class, 'listAccounts'])->name('dropbox.account.index');
+     Route::post('/account/setup', [DropboxController::class, 'setupAccount'])->name('dropbox.account.setup');
+     Route::post('/account/update', [DropboxController::class, 'updateDropbox'])->name('dropbox.account.update');
+     Route::delete('/account/{id}', [DropboxController::class, 'deleteAccount'])->name('dropbox.account.delete');
+
     // File Operations
     Route::post('/files/store-details', [DropboxController::class, 'storeFileDetails'])->name('dropbox.files.store');
     Route::get('/files/accounts', [DropboxController::class, 'getAccountForUpload'])->name('dropbox.files.accounts');
