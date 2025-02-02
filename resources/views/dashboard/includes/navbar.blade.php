@@ -20,12 +20,12 @@
               class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
               <div class="d-flex align-items-center">
                   <div class="avatar-lg me-4">
-                      <img src="../../assets/img/team/profile-picture-3.jpg"
-                          class="card-img-top rounded-circle border-white" alt="Bonnie Green">
+                      <img src="#image" alt="User avatar"
+                          class="card-img-top rounded-circle border-white">
                   </div>
                   <div class="d-block">
-                      <h2 class="h5 mb-3">Hi, Jane</h2>
-                      <a href="../../pages/examples/sign-in.html"
+                      <h2 class="h5 mb-3">Hi, name</h2>
+                      <a href="#"
                           class="btn btn-secondary btn-sm d-inline-flex align-items-center">
                           <svg class="icon icon-xxs me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                               xmlns="http://www.w3.org/2000/svg">
