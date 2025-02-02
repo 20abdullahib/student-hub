@@ -94,12 +94,12 @@
                 <div class="multi-level collapse " role="list" id="Dropbox" aria-expanded="false">
                     <ul class="flex-column nav">
                         <li class="nav-item ">
-                            <a class="nav-link" href="{{ route('dropbox.form') }}">
+                            <a class="nav-link" href="{{ route('dropbox.account.form') }}">
                                 <span class="sidebar-text">New Account</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link" href="{{ route('upload.form') }}">
+                            <a class="nav-link" href="{{ route('dropbox.upload.form') }}">
                                 <span class="sidebar-text">Upload Files</span>
                             </a>
                         </li>

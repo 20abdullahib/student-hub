@@ -29,7 +29,7 @@
         <div class="col-12 mb-4">
             <div class="card border-0 shadow components-section">
                 <div class="card-body">
-                    <form action="{{ route('dropbox.setup') }}" method="POST">
+                    <form action="{{ route('dropbox.account.setup') }}" method="POST">
                         @csrf
                         <!-- Email -->
                         <div class="mb-4">

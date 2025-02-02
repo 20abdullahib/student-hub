@@ -116,7 +116,7 @@ const NetworkService = (() => {
     },
 
     sendFileDetails: async (fileData) => {
-      return fetchWithRetry('/dashboard/dropbox/file-details', {
+      return fetchWithRetry('/dashboard/dropbox/files/store-details', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ const NetworkService = (() => {
     },
 
     updateAccountSpace: async (accountId, remainingSpace) => {
-      return fetchWithRetry('/dropbox/update', {
+      return fetchWithRetry('/dashboard/dropbox/account/update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ const NetworkService = (() => {
 
     getAvailableAccounts: async (subjectId) => {
       const response = await fetchWithRetry(
-        `/dashboard/dropbox/get-account-for-upload?subject_id=${subjectId}`,
+        `/dashboard/dropbox/files/accounts?subject_id=${subjectId}`,
         { headers: { 'X-CSRF-TOKEN': domElements.csrfToken } }
       );
       return response.json();
