@@ -45,7 +45,7 @@
                             <select id="subject" name="subject_id" class="form-select" required>
                                 <option value="" disabled selected>Select a subject</option>
                                 @foreach ($subjects as $subject)
-                                    <option value="{{ $subject->id }}">{{ $subject->title }}</option>
+                                    <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                                 @endforeach
                             </select>
                         </div>

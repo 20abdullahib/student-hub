@@ -20,31 +20,31 @@ class DropboxController extends Controller
     }
 
     // Account Management
-   public function listAccounts(Request $request)
-{
-    $totalSpace = 2147483648; // Total storage space in bytes
+    public function listAccounts(Request $request)
+    {
+        $totalSpace = 2147483648; // Total storage space in bytes
 
-    // Query accounts with optional filters
-    $accounts = DropboxAccount::select('id', 'email', 'client_id', 'department_id', 'remaining_storage')
-        ->when($request->email, function ($query, $email) {
-            return $query->where('email', 'like', "%$email%");
-        })
-        ->when($request->department_id, function ($query, $departmentId) {
-            return $query->where('department_id', $departmentId);
-        })
-        ->paginate(25); // Paginate with 25 accounts per page
+        // Query accounts with optional filters
+        $accounts = DropboxAccount::select('id', 'email', 'client_id', 'department_id', 'remaining_storage')
+            ->when($request->email, function ($query, $email) {
+                return $query->where('email', 'like', "%$email%");
+            })
+            ->when($request->department_id, function ($query, $departmentId) {
+                return $query->where('department_id', $departmentId);
+            })
+            ->paginate(25); // Paginate with 25 accounts per page
 
-    // Add department name and remaining percentage to each account
-    $accounts->each(function ($account) use ($totalSpace) {
-        $account->department_name = Department::find($account->department_id)->name;
-        $account->remaining_percentage = ($account->remaining_storage / $totalSpace) * 100;
-    });
+        // Add department name and remaining percentage to each account
+        $accounts->each(function ($account) use ($totalSpace) {
+            $account->department_name = Department::find($account->department_id)->name;
+            $account->remaining_percentage = ($account->remaining_storage / $totalSpace) * 100;
+        });
 
-    // Get all departments for the filter dropdown
-    $departments = Department::all();
+        // Get all departments for the filter dropdown
+        $departments = Department::all();
 
-    return view('dashboard.pages.dropbox.accounts', compact('accounts', 'totalSpace', 'departments'));
-}
+        return view('dashboard.pages.dropbox.accounts', compact('accounts', 'totalSpace', 'departments'));
+    }
 
     public function showForm()
     {
@@ -132,12 +132,17 @@ class DropboxController extends Controller
                 });
             })
             ->paginate(25);
-    
+
         return view('dashboard.pages.dropbox.files', [
             'files' => $files,
             'subjects' => Subject::all(),
             'departments' => Department::all(),
         ]);
+    }
+    public function deleteFiles(File $file)
+    {
+        $file->delete();
+        return response()->json(['success' => true]);
     }
 
     public function getAccountForUpload(Request $request)

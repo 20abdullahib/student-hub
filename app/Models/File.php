@@ -21,17 +21,11 @@ class File extends Model
         'updated_at',    
     ];
 
-public function subject()
-{
-    return $this->belongsTo(Subject::class)->withDefault([
-        'name' => 'N/A'
-    ]);
-}
-
-public function dropboxAccount()
-{
-    return $this->belongsTo(DropboxAccount::class)->withDefault([
-        'department' => (object) ['name' => 'N/A']
-    ]);
-}
+    public function subject() {
+        return $this->belongsTo(Subject::class);
+    }
+    
+    public function dropboxAccount() {
+        return $this->belongsTo(DropboxAccount::class);
+    }
 }

@@ -44,17 +44,21 @@ Route::prefix('dashboard/dropbox')->group(function () {
     // Forms
     Route::get('/account', [DropboxController::class, 'showForm'])->name('dropbox.account.form');
     Route::get('/upload', [DropboxController::class, 'showUploadForm'])->name('dropbox.upload.form');
-    
+
     // Account Operations
-     Route::get('/accounts', [DropboxController::class, 'listAccounts'])->name('dropbox.account.index');
-     Route::post('/account/setup', [DropboxController::class, 'setupAccount'])->name('dropbox.account.setup');
-     Route::post('/account/update', [DropboxController::class, 'updateDropbox'])->name('dropbox.account.update');
-     Route::delete('/account/{id}', [DropboxController::class, 'deleteAccount'])->name('dropbox.account.delete');
+    Route::get('/accounts', [DropboxController::class, 'listAccounts'])->name('dropbox.account.index');
+    Route::post('/account/setup', [DropboxController::class, 'setupAccount'])->name('dropbox.account.setup');
+    Route::post('/account/update', [DropboxController::class, 'updateDropbox'])->name('dropbox.account.update');
+    Route::delete('/account/{id}', [DropboxController::class, 'deleteAccount'])->name('dropbox.account.delete');
 
     // File Operations
     Route::post('/files/store-details', [DropboxController::class, 'storeFileDetails'])->name('dropbox.files.store');
     Route::get('/files', [DropboxController::class, 'listFiles'])->name('dropbox.files.index');
-    Route::get('/files/delete/{ids}', [DropboxController::class, 'deleteFile'])->name('dropbox.files.delete');
+
+    
+    // Route::post('/files/delete', [DropboxController::class, 'deleteFiles'])->name('dropbox.files.delete');
+    Route::delete('/files/{file}', [DropboxController::class, 'deleteFiles'])->name('dropbox.files.delete');
+
     Route::get('/files/accounts', [DropboxController::class, 'getAccountForUpload'])->name('dropbox.files.accounts');
 });
 
@@ -67,4 +71,3 @@ Route::prefix('dropbox')->group(function () {
 
 // Dashboard Main Routes
 Route::resource('/dashboard', DashboardController::class);
-
