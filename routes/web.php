@@ -54,11 +54,7 @@ Route::prefix('dashboard/dropbox')->group(function () {
     // File Operations
     Route::post('/files/store-details', [DropboxController::class, 'storeFileDetails'])->name('dropbox.files.store');
     Route::get('/files', [DropboxController::class, 'listFiles'])->name('dropbox.files.index');
-
-    
-    // Route::post('/files/delete', [DropboxController::class, 'deleteFiles'])->name('dropbox.files.delete');
     Route::delete('/files/{file}', [DropboxController::class, 'deleteFiles'])->name('dropbox.files.delete');
-
     Route::get('/files/accounts', [DropboxController::class, 'getAccountForUpload'])->name('dropbox.files.accounts');
 });
 
