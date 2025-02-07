@@ -2,7 +2,7 @@
 
 @section('title', 'Login')
 
-@include('dashboard.includes.alert')
+@include('dashboard.includes.alerts')
 
 @section('custom-css')
     <link rel="stylesheet" href="{{ asset('assets/login-singup/css/style.css') }}">
@@ -54,7 +54,9 @@
                         <div class="text-center text-md-center mb-4 mt-md-0">
                             <h1 class="mb-0 h3">Sign in to our platform</h1>
                         </div>
-                        <form action="#" class="mt-4">
+                        <form action="{{ route('dashboard.login') }}" method="POST" class="mt-4">
+                            @csrf
+                            @method('POST')
                             <!-- Form -->
                             <div class="form-group mb-4">
                                 <label for="email">Your Email</label>
@@ -68,7 +70,7 @@
                                             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
                                         </svg>
                                     </span>
-                                    <input type="email" class="form-control" placeholder="example@company.com"
+                                    <input type="email" name="email" class="form-control" placeholder="example@company.com"
                                         id="email" autofocus required>
                                 </div>
                             </div>
@@ -86,7 +88,7 @@
                                                     clip-rule="evenodd"></path>
                                             </svg>
                                         </span>
-                                        <input type="password" placeholder="Password" class="form-control" id="password"
+                                        <input type="password" name="password" placeholder="Password" class="form-control" id="password"
                                             required>
                                     </div>
                                 </div>
