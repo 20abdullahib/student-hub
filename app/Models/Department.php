@@ -34,4 +34,9 @@ class Department extends Model
     {
         return $this->hasManyThrough(File::class, DropboxAccount::class);
     }
+    public function admins()
+    {
+        return $this->hasMany(Admin::class);
+    }
+
 }

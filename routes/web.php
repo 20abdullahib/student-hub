@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\DropboxController;
 use App\Http\Controllers\Website\AboutController;
@@ -40,8 +41,7 @@ Route::get('/resources/filter/{department}/{branch?}', [ResourcesController::cla
 // Dashboard Routes 
 
 
-// Dropbox Routes
-Route::prefix('dashboard/dropbox')->group(function () {
+Route::prefix('dashboard/dropbox')->middleware('admin')->group(function () {
     // Forms
     Route::get('/account', [DropboxController::class, 'showForm'])->name('dropbox.account.form');
     Route::get('/upload', [DropboxController::class, 'showUploadForm'])->name('dropbox.upload.form');
@@ -59,15 +59,15 @@ Route::prefix('dashboard/dropbox')->group(function () {
     Route::get('/files/accounts', [DropboxController::class, 'getAccountForUpload'])->name('dropbox.files.accounts');
 });
 
-// API Endpoints
-Route::prefix('dropbox')->group(function () {
-    Route::get('/access-token', [DropboxController::class, 'getAccessToken'])->name('dropbox.api.token');
-    Route::post('/refresh-tokens', [DropboxController::class, 'refreshAllTokens'])->name('dropbox.api.refresh');
-    Route::get('/files/{departmentId}', [DropboxController::class, 'showFiles'])->name('dropbox.api.files');
-});
-
 // Dashboard Main Routes
-Route::resource('/dashboard', DashboardController::class);
+Route::resource('/dashboard', DashboardController::class)->middleware('admin');
 
 // Auth Routes
 Auth::routes();
+
+Route::prefix('dashboard')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('dashboard.login.form');
+    Route::post('/login', [LoginController::class, 'login'])->name('dashboard.login');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('dashboard.logout');
+});
+
