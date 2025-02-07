@@ -19,6 +19,6 @@ class AdminMiddleware
         if (Auth::check() && Auth::admin()) {
             return $next($request);
         }
-            return redirect()->route('dashboard.login.form')->with('error', 'Access Denied');
-        }
+        return redirect()->route('dashboard.login.form')->with('error', 'Access Denied');
+    }
 }

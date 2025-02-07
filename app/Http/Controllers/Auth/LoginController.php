@@ -74,9 +74,19 @@ class LoginController extends Controller
         return back()->withErrors(['email' => 'Invalid email or password']);
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
+        // Log out from the 'admin' guard
         Auth::guard('admin')->logout();
+    
+        // Invalidate the current session
+        $request->session()->invalidate();
+    
+        // Regenerate the CSRF token to avoid session fixation issues
+        $request->session()->regenerateToken();
+    
+        // Redirect to the login page
         return redirect()->route('dashboard.login.form');
     }
+    
 }

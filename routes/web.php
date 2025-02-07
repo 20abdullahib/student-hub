@@ -42,7 +42,7 @@ Route::get('/resources/filter/{department}/{branch?}', [ResourcesController::cla
 
 
 // Dropbox Routes
-Route::prefix('dashboard/dropbox')->middleware('auth:admin')->group(function () {
+Route::prefix('dashboard/dropbox')->middleware(['auth:admin', 'session.timeout'])->group(function () {
     // Forms
     Route::get('/account', [DropboxController::class, 'showForm'])->name('dropbox.account.form');
     Route::get('/upload', [DropboxController::class, 'showUploadForm'])->name('dropbox.upload.form');
@@ -68,7 +68,7 @@ Route::prefix('dropbox')->group(function () {
 });
 
 // Dashboard Main Routes
-Route::resource('/dashboard', DashboardController::class)->middleware('auth:admin');
+Route::resource('/dashboard', DashboardController::class)->middleware(['auth:admin', 'session.timeout']);
 
 // Auth Routes
 Auth::routes();
@@ -78,4 +78,3 @@ Route::prefix('dashboard')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])->name('dashboard.login');
     Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth:admin')->name('dashboard.logout');
 });
-
