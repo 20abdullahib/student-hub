@@ -10,7 +10,8 @@
 
 <body>
     <!-- Navbar -->
-    @include('dashboard.includes.navbar')
+    @include('dashboard.includes.mobile-navbar')
+    @include('dashboard.includes.sidebar')
 
     <main class="content">
         <!-- Header -->

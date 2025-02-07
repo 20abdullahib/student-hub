@@ -2,37 +2,42 @@
 
 @section('title', 'Login')
 
-@include('dashboard.includes.alerts')
 
 @section('custom-css')
     <link rel="stylesheet" href="{{ asset('assets/login-singup/css/style.css') }}">
     <style>
         /* Add custom styles for the background image */
-        .login-singup > .container > div {
+        .login-singup>.container>div {
             background-image: url('{{ asset('assets/login-singup/images/signin.svg') }}');
-            background-size: cover; /* Ensures the image covers the entire container */
-            background-position: center; /* Centers the image */
-            background-repeat: no-repeat; /* Prevents the image from repeating */
+            background-size: cover;
+            /* Ensures the image covers the entire container */
+            background-position: center;
+            /* Centers the image */
+            background-repeat: no-repeat;
+            /* Prevents the image from repeating */
             padding-bottom: 7em;
         }
-        
+
         /* Adjustments for smaller screens */
         @media (max-width: 768px) {
             .login-singup {
-                background-size: contain; /* Ensures the entire image is visible on smaller screens */
+                background-size: contain;
+                /* Ensures the entire image is visible on smaller screens */
             }
         }
 
         /* Adjustments for very small screens */
         @media (max-width: 480px) {
             .login-singup {
-                background-image: url('{{ asset('assets/login-singup/images/signin-mobile.svg') }}'); /* Use a smaller image for mobile */
+                background-image: url('{{ asset('assets/login-singup/images/signin-mobile.svg') }}');
+                /* Use a smaller image for mobile */
             }
         }
     </style>
 @endsection
 
 @section('content')
+    @include('dashboard.includes.alerts')
     <!-- Section -->
     <section class="login-singup mt-5 mt-lg-5 bg-soft d-flex align-items-center">
         <div class="container">
@@ -46,9 +51,7 @@
                     Back to homepage
                 </a>
             </p>
-            <div class="row justify-content-center form-bg-image" 
-            {{-- data-background-lg="{{ asset('assets/login-singup/images/signin.svg') }}" style="background : url({{ asset('assets/login-singup/images/signin.svg') }})" --}}
-            >
+            <div class="row justify-content-center form-bg-image" {{-- data-background-lg="{{ asset('assets/login-singup/images/signin.svg') }}" style="background : url({{ asset('assets/login-singup/images/signin.svg') }})" --}}>
                 <div class="col-12 d-flex align-items-center justify-content-center">
                     <div class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500">
                         <div class="text-center text-md-center mb-4 mt-md-0">
@@ -70,8 +73,8 @@
                                             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
                                         </svg>
                                     </span>
-                                    <input type="email" name="email" class="form-control" placeholder="example@company.com"
-                                        id="email" autofocus required>
+                                    <input type="email" name="email" class="form-control"
+                                        placeholder="example@company.com" id="email" autofocus required>
                                 </div>
                             </div>
                             <!-- End of Form -->
@@ -88,8 +91,8 @@
                                                     clip-rule="evenodd"></path>
                                             </svg>
                                         </span>
-                                        <input type="password" name="password" placeholder="Password" class="form-control" id="password"
-                                            required>
+                                        <input type="password" name="password" placeholder="Password" class="form-control"
+                                            id="password" required>
                                     </div>
                                 </div>
                                 <!-- End of Form -->
