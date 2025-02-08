@@ -72,8 +72,11 @@ Route::prefix('dropbox')->group(function () {
 Route::resource('/dashboard', DashboardController::class)->middleware(['auth:admin', 'session.timeout'])->where(['dashboard' => '^(?!admin$).*']);
 
 // Admin Routes
-Route::prefix('dashboard')->middleware(['auth:admin', 'session.timeout'])->group(function () {
-    Route::resource('admin', AdminController::class);
+Route::middleware(['auth:admin', 'session.timeout'])->group(function () {
+    Route::prefix('dashboard')->group(function () {
+        Route::resource('admin', AdminController::class);
+    });
+    Route::get('admin/search-suggestions', [AdminController::class, 'searchSuggestions'])->name('admin.search-suggestions');
 });
 
 // Auth Routes

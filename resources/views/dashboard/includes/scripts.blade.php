@@ -20,3 +20,12 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+
+<!-- Include jQuery UI CSS (adjust version/path as needed) -->
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+<!-- Include jQuery (if not already included) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Include jQuery UI JS -->
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>

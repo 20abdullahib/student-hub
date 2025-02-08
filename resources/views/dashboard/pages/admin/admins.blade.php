@@ -2,6 +2,19 @@
 
 @section('title', 'Admins')
 
+@section('custom-css')
+<style>
+    /* Style for category header items in the autocomplete menu */
+    .ui-autocomplete-category {
+        font-weight: bold;
+        margin: 0.8em 0 0.2em;
+        padding: 0.2em 1em;
+        border-top: 1px solid #ccc;
+        background-color: #f7f7f7;
+    }
+</style>
+@endsection
+
 @section('content')
     <div class="py-4">
         <!-- Breadcrumb -->
@@ -79,12 +92,11 @@
     <div class="card border-0 shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">
-                <form action="{{ route('admin.index') }}" method="GET">
-                    <!-- Search by Name or Email -->
+                <form id="search-form" action="{{ route('admin.index') }}" method="GET">
                     <div class="mb-3 d-flex justify-content-between">
-                        <input type="text" name="search" class="form-control" placeholder="Search by name or email"
+                        <input id="search" type="text" name="search" class="form-control" placeholder="Search by name or email"
                             value="{{ request('search') }}">
-                            <button type="submit" class="btn btn-primary ms-2">Search</button>
+                        <button type="submit" class="btn btn-primary ms-2">Search</button>
                     </div>
                 </form>
                 <table class="table table-centered table-nowrap mb-0 rounded text-center">
@@ -139,4 +151,48 @@
         </div>
     </div>
 
+@endsection
+
+
+@section('custom-scripts')
+<script>
+    $.widget("custom.catcomplete", $.ui.autocomplete, {
+        _renderMenu: function(ul, items) {
+            var that = this,
+                currentCategory = "";
+            $.each(items, function(index, item) {
+                if (item.category !== currentCategory) {
+                    ul.append("<li class='ui-autocomplete-category'>" + item.category + "</li>");
+                    currentCategory = item.category;
+                }
+                that._renderItemData(ul, item);
+            });
+        }
+    });
+    
+    $(document).ready(function() {
+        $("#search").catcomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "{{ route('admin.search-suggestions') }}",
+                    dataType: "json",
+                    data: {
+                        query: request.term
+                    },
+                    success: function(data) {
+                        response(data);
+                    },
+                    error: function() {
+                        response([]);
+                    }
+                });
+            },
+            minLength: 1, 
+            select: function(event, ui) {
+                $("#search").val(ui.item.value);
+                return false;
+            }
+        });
+    });
+</script>
 @endsection
