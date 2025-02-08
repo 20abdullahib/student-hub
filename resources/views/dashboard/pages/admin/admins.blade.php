@@ -1,0 +1,142 @@
+@extends('dashboard.layout.layout')
+
+@section('title', 'Admins')
+
+@section('content')
+    <div class="py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
+            <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
+                <li class="breadcrumb-item">
+                    <a href="{{ route('dashboard.index') }}">
+                        <svg class="icon icon-xxs" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                            </path>
+                        </svg>
+                    </a>
+                </li>
+                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Admins</li>
+            </ol>
+        </nav>
+
+        <!-- Page Heading & Add Button -->
+        <div class="d-flex justify-content-between w-100 flex-wrap">
+            <div class="mb-3 mb-lg-0">
+                <h1 class="h4">Admins</h1>
+                <a href="{{ route('admin.create') }}" class="btn btn-primary">
+                    <svg class="icon icon-xxs me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                        </path>
+                    </svg>
+                    Add New Admin
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="card border-0 shadow mb-4">
+        <div class="card-body">
+            <form action="{{ route('admin.index') }}" method="GET">
+                <div class="row">
+                    <!-- Filter by Branch -->
+                    <div class="col-md-3">
+                        <select name="branch_id" class="form-control">
+                            <option value="">Filter by Branch</option>
+                            @foreach ($branches as $branch)
+                                <option value="{{ $branch->id }}"
+                                    {{ request('branch_id') == $branch->id ? 'selected' : '' }}>
+                                    {{ $branch->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <!-- Filter by Department -->
+                    <div class="col-md-3">
+                        <select name="department_id" class="form-control">
+                            <option value="">Filter by Department</option>
+                            @foreach ($departments as $department)
+                                <option value="{{ $department->id }}"
+                                    {{ request('department_id') == $department->id ? 'selected' : '' }}>
+                                    {{ $department->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <!-- Filter / Reset Buttons -->
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{{ route('admin.index') }}" class="btn btn-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admins Table -->
+    <div class="card border-0 shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <form action="{{ route('admin.index') }}" method="GET">
+                    <!-- Search by Name or Email -->
+                    <div class="mb-3 d-flex justify-content-between">
+                        <input type="text" name="search" class="form-control" placeholder="Search by name or email"
+                            value="{{ request('search') }}">
+                            <button type="submit" class="btn btn-primary ms-2">Search</button>
+                    </div>
+                </form>
+                <table class="table table-centered table-nowrap mb-0 rounded text-center">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Branch</th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th class="rounded-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($admins as $admin)
+                            <tr class="hover-shadow">
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $admin->name }}</td>
+                                <td>{{ $admin->email }}</td>
+                                <td>{{ $admin->branch->name ?? 'N/A' }}</td>
+                                <td>{{ $admin->department->name ?? 'N/A' }}</td>
+                                <td>{{ ucfirst($admin->role) }}</td>
+                                <td>
+                                    <a href="{{ route('admin.edit', $admin->id) }}" class="btn btn-outline-primary btn-sm">
+                                        Edit
+                                    </a>
+                                    <form action="{{ route('admin.destroy', $admin->id) }}" method="POST"
+                                        style="display:inline;"
+                                        onsubmit="return confirm('Are you sure you want to delete this admin?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7">No admins found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Links -->
+            <div class="d-flex justify-content-center">
+                {{ $admins->appends(request()->input())->links() }}
+            </div>
+        </div>
+    </div>
+
+@endsection

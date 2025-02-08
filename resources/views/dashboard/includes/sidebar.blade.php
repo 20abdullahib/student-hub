@@ -110,8 +110,52 @@
                 </div>
             </li>
 
-
-
+            <!-- Admins -->     
+            <li class="nav-item">
+                <span
+                    class="nav-link d-flex justify-content-between align-items-center {{ request()->is('dashboard/admin*') ? 'active' : 'collapsed' }}"
+                    data-bs-toggle="collapse" data-bs-target="#Admins">
+                    <span>
+                        <span class="sidebar-icon">
+                            <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M7.004 3.5L2 6.689l5.004 3.191L2 13.063 7.004 16.5l5.006-3.188L17 16.5l5.004-3.188L17 10.006l5.004-3.187L17 3.5l-4.996 3.187L7.004 3.5zM2 16.689l5.004 3.188 4.996-3.188-5.004-3.187L2 16.689zm10 0l4.996 3.188 5.004-3.188-4.996-3.187L12 16.689z">
+                                </path>
+                            </svg>
+                        </span>
+                        <span class="sidebar-text">Admins</span>
+                    </span>
+                    <span class="link-arrow">
+                        <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd"
+                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </span>
+                </span>
+                <div class="multi-level collapse {{ request()->is('dashboard/admin*') ? 'show' : '' }}" role="list"
+                    id="Admins" aria-expanded="{{ request()->is('dashboard/admin*') ? 'true' : 'false' }}">
+                    <ul class="flex-column nav">
+                        <li class="nav-item {{ request()->routeIs('admin.index') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.index') }}">
+                                <span class="sidebar-text">Admins</span>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('admin.create') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('admin.create') }}">
+                                <span class="sidebar-text">New Admins</span>
+                            </a>
+                        </li>
+                        {{-- <li class="nav-item {{ request()->routeIs('dropbox.upload.form') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('dropbox.upload.form') }}">
+                                <span class="sidebar-text">Permissions</span>
+                            </a>
+                        </li> --}}
+                    </ul>
+                </div>
+            </li>
 
 
 

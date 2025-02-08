@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Dashboard\AdminController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Dashboard\DropboxController;
 use App\Http\Controllers\Website\AboutController;
@@ -68,7 +69,12 @@ Route::prefix('dropbox')->group(function () {
 });
 
 // Dashboard Main Routes
-Route::resource('/dashboard', DashboardController::class)->middleware(['auth:admin', 'session.timeout']);
+Route::resource('/dashboard', DashboardController::class)->middleware(['auth:admin', 'session.timeout'])->where(['dashboard' => '^(?!admin$).*']);
+
+// Admin Routes
+Route::prefix('dashboard')->middleware(['auth:admin', 'session.timeout'])->group(function () {
+    Route::resource('admin', AdminController::class);
+});
 
 // Auth Routes
 Auth::routes();
