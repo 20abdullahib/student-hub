@@ -13,6 +13,5 @@
 <script src="{{asset('assets/Website/scripts/bootnav.js') }}"></script>
 <script src="{{asset('assets/Website/scripts/custom-script.js') }}"></script>
 <script src="{{asset('assets/Website/scripts/handel-search-requset.js') }}"></script>
-<script src="{{asset('assets/Website/scripts/dropbox.js') }}"></script>
 
 

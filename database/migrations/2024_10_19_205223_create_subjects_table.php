@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('subjects', function (Blueprint $table) {
             $table->bigIncrements('id');  // Primary key, auto-incrementing
-            // $table->text('title');        // Title field (text, not null)
-            $table->text('name');        
+            $table->text('name'); // name field (text, not null)
             $table->text('description')->nullable();  // Description field (nullable)
             $table->text('code');  // Code field (text, not null)
             $table->foreignId('department_id')  // Foreign key to departments table

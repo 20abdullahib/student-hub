@@ -35,10 +35,10 @@ class AboutController extends Controller
     {
         $query = $request->input('query');
 
-        // Fetch subjects based on title or code
-        $subjects = Subject::where('title', 'LIKE', "%{$query}%")
+        // Fetch subjects based on name or code
+        $subjects = Subject::where('name', 'LIKE', "%{$query}%")
                     ->orWhere('code', 'LIKE', "%{$query}%")
-                    ->get(['title', 'code']); // Return only necessary fields
+                    ->get(['name', 'code']); // Return only necessary fields
 
                     dd($subjects);
         return response()->json($subjects); // Return suggestions as JSON

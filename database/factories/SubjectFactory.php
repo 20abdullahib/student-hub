@@ -17,7 +17,7 @@ class SubjectFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->sentence(3),  // Generate a random title
+            'name' => $this->faker->sentence(3),  // Generate a random name
             'description' => $this->faker->paragraph(),  // Random description
             'department_id' => \App\Models\Department::inRandomOrder()->first()->id,  // Random existing department
             'code' => strtoupper($this->faker->unique()->bothify('SUB###')),  // Random unique code like "SUB123"
