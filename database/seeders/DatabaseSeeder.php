@@ -128,8 +128,9 @@ class DatabaseSeeder extends Seeder
             'branch_id' => 1,
             'role' => 'super admin',
         ]);
+        $admin->assignRole('super admin');
 
-        // $admin->assignRole('');
+
 
 
 

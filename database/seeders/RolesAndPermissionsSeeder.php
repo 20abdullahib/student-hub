@@ -15,6 +15,7 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
+
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
@@ -28,24 +29,36 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete roles',
         ];
 
-        // Create permissions.
+        // Create permissions with guard 'admin'.
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+            Permission::firstOrCreate([
+                'name'       => $permission,
+                'guard_name' => 'admin'
+            ]);
         }
 
-        // Create roles.
-        $superAdminRole = Role::firstOrCreate(['name' => 'super admin']);
-        $editorRole = Role::firstOrCreate(['name' => 'editor']);
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        // Create roles with guard 'admin'.
+        $superAdminRole = Role::firstOrCreate([
+            'name'       => 'super admin',
+            'guard_name' => 'admin'
+        ]);
+        $editorRole = Role::firstOrCreate([
+            'name'       => 'editor',
+            'guard_name' => 'admin'
+        ]);
+        $adminRole = Role::firstOrCreate([
+            'name'       => 'admin',
+            'guard_name' => 'admin'
+        ]);
 
         // Assign permissions to roles.
         // Super admin gets all permissions.
         $superAdminRole->syncPermissions(Permission::all());
 
-        // Editor can only upload files.
-        $editorRole->syncPermissions(['upload files','delete files']);
+        // Editor can only upload files and delete files.
+        $editorRole->syncPermissions(['upload files', 'delete files']);
 
         // Admin can upload files and add admins.
-        $adminRole->syncPermissions(['upload files','delete files', 'add admins']);
+        $adminRole->syncPermissions(['upload files', 'delete files', 'add admins']);
     }
 }
