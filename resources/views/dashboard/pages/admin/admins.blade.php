@@ -3,16 +3,16 @@
 @section('title', 'Admins')
 
 @section('custom-css')
-<style>
-    /* Style for category header items in the autocomplete menu */
-    .ui-autocomplete-category {
-        font-weight: bold;
-        margin: 0.8em 0 0.2em;
-        padding: 0.2em 1em;
-        border-top: 1px solid #ccc;
-        background-color: #f7f7f7;
-    }
-</style>
+    <style>
+        /* Style for category header items in the autocomplete menu */
+        .ui-autocomplete-category {
+            font-weight: bold;
+            margin: 0.8em 0 0.2em;
+            padding: 0.2em 1em;
+            border-top: 1px solid #ccc;
+            background-color: #f7f7f7;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -35,18 +35,20 @@
         </nav>
 
         <!-- Page Heading & Add Button -->
-        <div class="d-flex justify-content-between w-100 flex-wrap">
-            <div class="mb-3 mb-lg-0">
-                <h1 class="h4">Admins</h1>
-                <a href="{{ route('admin.create') }}" class="btn btn-primary">
-                    <svg class="icon icon-xxs me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                        </path>
-                    </svg>
-                    Add New Admin
-                </a>
+        @can('add admins')
+            <div class="d-flex justify-content-between w-100 flex-wrap">
+                <div class="mb-3 mb-lg-0">
+                    <h1 class="h4">Admins</h1>
+                    <a href="{{ route('admin.create') }}" class="btn btn-primary">
+                        <svg class="icon icon-xxs me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                            </path>
+                        </svg>
+                        Add New Admin
+                    </a>
+                </div>
             </div>
-        </div>
+        @endcan
     </div>
 
     <!-- Filter Form -->
@@ -94,8 +96,8 @@
             <div class="table-responsive">
                 <form id="search-form" action="{{ route('admin.index') }}" method="GET">
                     <div class="mb-3 d-flex justify-content-between">
-                        <input id="search" type="text" name="search" class="form-control" placeholder="Search by name or email"
-                            value="{{ request('search') }}">
+                        <input id="search" type="text" name="search" class="form-control"
+                            placeholder="Search by name or email" value="{{ request('search') }}">
                         <button type="submit" class="btn btn-primary ms-2">Search</button>
                     </div>
                 </form>
@@ -108,7 +110,9 @@
                             <th>Branch</th>
                             <th>Department</th>
                             <th>Role</th>
-                            <th class="rounded-end">Actions</th>
+                            @can('delete admins')
+                                <th class="rounded-end">Actions</th>
+                            @endcan
                         </tr>
                     </thead>
                     <tbody>
@@ -119,21 +123,33 @@
                                 <td>{{ $admin->email }}</td>
                                 <td>{{ $admin->branch->name ?? 'N/A' }}</td>
                                 <td>{{ $admin->department->name ?? 'N/A' }}</td>
-                                <td>{{ Str::title($admin->role) }}</td>
-                                <td>
-                                    <a href="{{ route('admin.edit', $admin->id) }}" class="btn btn-outline-primary btn-sm">
-                                        Edit
-                                    </a>
-                                    <form action="{{ route('admin.destroy', $admin->id) }}" method="POST"
-                                        style="display:inline;"
-                                        onsubmit="return confirm('Are you sure you want to delete this admin?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">
-                                            Delete
-                                        </button>
-                                    </form>
+                                <td class="role-edit" data-admin-id="{{ $admin->id }}">
+                                    <span class="role-text">{{ Str::title($admin->role) }}</span>
+                                    @can('edit admins')
+                                        <select class="role-select form-select d-none"
+                                            style="width: 10em; display: inline-block;">
+                                            @foreach ($roles as $role)
+                                                <option value="{{ $role->name }}"
+                                                    {{ $admin->role == $role->name ? 'selected' : '' }}>
+                                                    {{ Str::title($role->name) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    @endcan
                                 </td>
+                                @can('delete admins')
+                                    <td>
+                                        <form action="{{ route('admin.destroy', $admin->id) }}" method="POST"
+                                            style="display:inline;"
+                                            onsubmit="return confirm('Are you sure you want to delete this admin?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                @endcan
                             </tr>
                         @empty
                             <tr>
@@ -155,44 +171,96 @@
 
 
 @section('custom-scripts')
-<script>
-    $.widget("custom.catcomplete", $.ui.autocomplete, {
-        _renderMenu: function(ul, items) {
-            var that = this,
-                currentCategory = "";
-            $.each(items, function(index, item) {
-                if (item.category !== currentCategory) {
-                    ul.append("<li class='ui-autocomplete-category'>" + item.category + "</li>");
-                    currentCategory = item.category;
+    <script>
+        $(document).ready(function() {
+            // --- Autocomplete Widget Setup ---
+            $.widget("custom.catcomplete", $.ui.autocomplete, {
+                _renderMenu: function(ul, items) {
+                    var that = this,
+                        currentCategory = "";
+                    $.each(items, function(index, item) {
+                        if (item.category !== currentCategory) {
+                            ul.append("<li class='ui-autocomplete-category'>" + item.category +
+                                "</li>");
+                            currentCategory = item.category;
+                        }
+                        that._renderItemData(ul, item);
+                    });
                 }
-                that._renderItemData(ul, item);
             });
-        }
-    });
-    
-    $(document).ready(function() {
-        $("#search").catcomplete({
-            source: function(request, response) {
+
+            // Initialize autocomplete for the search field (if used)
+            $("#search").catcomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: "{{ route('admin.search-suggestions') }}",
+                        dataType: "json",
+                        data: {
+                            query: request.term
+                        },
+                        success: function(data) {
+                            response(data);
+                        },
+                        error: function() {
+                            response([]);
+                        }
+                    });
+                },
+                minLength: 1,
+                select: function(event, ui) {
+                    $("#search").val(ui.item.value);
+                    return false;
+                }
+            });
+            // --- End of Autocomplete Setup ---
+
+            // --- Inline Editing for the Role Column ---
+            // When the role text is clicked, hide it and show the select dropdown.
+            $('.role-edit .role-text').on('click', function() {
+                var $parent = $(this).closest('.role-edit');
+                $(this).hide();
+                $parent.find('.role-select').removeClass('d-none').focus();
+            });
+
+            // When a new role is selected from the dropdown, update via AJAX.
+            $('.role-edit .role-select').on('change', function() {
+                var newRole = $(this).val();
+                var $parent = $(this).closest('.role-edit');
+                var adminId = $parent.data('admin-id');
+
                 $.ajax({
-                    url: "{{ route('admin.search-suggestions') }}",
-                    dataType: "json",
+                    // URL includes the /dashboard prefix to match your route
+                    url: '/dashboard/admin/' + adminId + '/update-role',
+                    method: 'PATCH',
                     data: {
-                        query: request.term
+                        role: newRole,
+                        _token: '{{ csrf_token() }}'
                     },
-                    success: function(data) {
-                        response(data);
+                    success: function(response) {
+                        // Update the displayed role text
+                        $parent.find('.role-text').text(response.role_label).show();
+                        // Hide the select dropdown
+                        $parent.find('.role-select').addClass('d-none');
+                        // Display the success message
+                        alert(response.message);
                     },
-                    error: function() {
-                        response([]);
+                    error: function(xhr) {
+                        console.log(xhr.responseJSON);
+                        alert('Error updating role. Please try again.');
+                        $parent.find('.role-select').addClass('d-none');
+                        $parent.find('.role-text').show();
                     }
                 });
-            },
-            minLength: 1, 
-            select: function(event, ui) {
-                $("#search").val(ui.item.value);
-                return false;
-            }
+            });
+
+            // If the select loses focus without a change, hide it and show the role text again.
+            $('.role-edit .role-select').on('blur', function() {
+                var $parent = $(this).closest('.role-edit');
+                $(this).addClass('d-none');
+                $parent.find('.role-text').show();
+            });
+            // --- End of Inline Editing ---
         });
-    });
-</script>
+    </script>
+    </script>
 @endsection

@@ -7,6 +7,7 @@ use App\Models\Branch;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 
@@ -48,8 +49,9 @@ class AdminController extends Controller
         // Make sure to pass $branches and $departments to the view
         $branches = Branch::all();
         $departments = Department::all();
-
-        return view('dashboard.pages.admin.admins', compact('admins', 'branches', 'departments'));
+        // $roleNames = Role::all()->pluck('name');
+        $roles = Role::all();
+        return view('dashboard.pages.admin.admins', compact('admins', 'branches', 'departments', 'roles'));
     }
     public function searchSuggestions(Request $request)
     {
@@ -138,7 +140,6 @@ class AdminController extends Controller
             'password'      => $validated['password'],
             'department_id' => $validated['department_id'],
             'branch_id'     => $validated['branch_id'],
-            // Optionally, if you store role in a column (even if not necessary with Spatie):
             'role'          => $validated['role'],
         ]);
 
@@ -163,6 +164,27 @@ class AdminController extends Controller
     {
         //
     }
+    /**
+     * Update the specified admin's role.
+     */
+    public function updateRole(Request $request, Admin $admin)
+    {
+        $allowedRoles = Role::pluck('name')->toArray();
+    
+        $request->validate([
+            'role' => 'required|in:' . implode(',', $allowedRoles),
+        ]);
+    
+        $admin->syncRoles($request->role);
+    
+        $newRole = $admin->getRoleNames()->first();
+        
+        return response()->json([
+            'role_label' => Str::title($newRole),
+            'message'    => 'Role updated successfully.'
+        ]);
+    }
+    
 
     /**
      * Update the specified resource in storage.
@@ -177,6 +199,12 @@ class AdminController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $admin = Admin::findOrFail($id);
+
+        $admin->removeRole($admin->role);
+
+        $admin->delete();
+
+        return redirect()->route('admin.index')->with('success', 'Admin deleted successfully.');
     }
 }

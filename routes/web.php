@@ -77,9 +77,9 @@ Route::middleware(['auth:admin', 'session.timeout'])->group(function () {
         Route::resource('admin', AdminController::class);
         Route::resource('permission', PermissionController::class);
         Route::post('permission/role', [PermissionController::class, 'storeRole'])->name('permission.store.role');
-
+        Route::patch('admin/{admin}/update-role', [AdminController::class, 'updateRole'])->name('admin.updateRole');
     });
-
+    
     Route::get('admin/search-suggestions', [AdminController::class, 'searchSuggestions'])->name('admin.search-suggestions');
     Route::resource('/dashboard', DashboardController::class);
 });

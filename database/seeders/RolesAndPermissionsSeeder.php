@@ -25,6 +25,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'delete files',
             'add admins',
             'delete admins',
+            'edit admins',
             'add roles',
             'delete roles',
         ];

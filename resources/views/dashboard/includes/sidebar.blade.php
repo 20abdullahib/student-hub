@@ -159,19 +159,18 @@
                                         <span class="sidebar-text">Admins</span>
                                     </a>
                                 </li>
-                            @endhasanyrole
-                            @hasanyrole('super admin')
-                                
-                            <li class="nav-item {{ request()->routeIs('admin.create') ? 'active' : '' }}">
-                                <a class="nav-link" href="{{ route('admin.create') }}">
-                                    <span class="sidebar-text">New Admins</span>
-                                </a>
-                            </li>
-                            <li class="nav-item {{ request()->routeIs('permission.create') ? 'active' : '' }}">
-                                <a class="nav-link" href="{{ route('permission.create') }}">
-                                    <span class="sidebar-text">Permissions</span>
-                                </a>
-                            </li>
+                                <li class="nav-item {{ request()->routeIs('admin.create') ? 'active' : '' }}">
+                                    <a class="nav-link" href="{{ route('admin.create') }}">
+                                        <span class="sidebar-text">New Admins</span>
+                                    </a>
+                                </li>
+                                @can('add roles')
+                                    <li class="nav-item {{ request()->routeIs('permission.create') ? 'active' : '' }}">
+                                        <a class="nav-link" href="{{ route('permission.create') }}">
+                                            <span class="sidebar-text">Permissions</span>
+                                        </a>
+                                    </li>
+                                @endcan
                             @endhasanyrole
                         </ul>
                     </div>
