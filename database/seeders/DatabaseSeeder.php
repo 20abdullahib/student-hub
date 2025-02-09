@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Subject;
 use App\Models\User;
 use App\Models\Admin;
 use App\Models\Branch;
@@ -26,11 +27,11 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        /*        
-// ==================================================
-// |       Insert default department data           |
-// ==================================================
-*/
+        /**         
+         * ==================================================
+         * |       Insert default department data           |
+         * ==================================================
+         **/
 
         Department::insert([
             ['name' => 'Mathematics', 'created_at' => now(), 'updated_at' => now()],
@@ -41,11 +42,11 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Animals', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        /*        
-// =========================================================
-// |       Insert all branches into the database           |
-// =========================================================
-*/
+        /** 
+         * =========================================================
+         * |       Insert all branches into the database           |
+         * =========================================================
+         **/
         Branch::insert([
             ['name' => 'Mathematics', 'department_id' => 1], // Mathematics
             ['name' => 'Mathematics and Physics', 'department_id' => 1],
@@ -67,11 +68,11 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Insect Chemistry', 'department_id' => 6],
         ]);
 
-        /*        
-// ========================================
-// |        Insert generations            |
-// ========================================
-*/
+        /**         
+         * ========================================
+         * |        Insert generations            |
+         * ========================================
+         **/
         $years = range(2020, 2030); // Insert for 2020, 2021, 2022, 2023
         $peoplePerYear = 10;
         $branchIds = range(1, 18); // Assuming you have 18 branches
@@ -92,31 +93,36 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        /*        
-// ==========================================================================
-// |        Seed the subjects and attach random branches to them.           |
-// ==========================================================================
-*/
+        /**         
+         * ==========================================================================
+         * |        Seed the subjects and attach random branches to them.           |
+         * ==========================================================================
+         **/
         $this->call(SubjectSeeder::class);
 
-        // Fetch all subjects
-        $subjects = \App\Models\Subject::all();
+
+        /**
+         * for test only
+         * Generate 50 fake subject records
+         * Subject::factory()->count(50)->create();
+         **/
+        // for testing purposes
+        // // Fetch all subjects
+        // $subjects = Subject::all();
+
+        // // Attach random branches to random subjects
+        // foreach ($subjects as $subject) {
+        //     // Get a random number of branches to attach (between 1 and 3 for example)
+        //     $randomBranches = $faker->randomElements($branchIds, $faker->numberBetween(1, 18));
+        //     $subject->branches()->attach($randomBranches);
+        // }
 
 
-
-        // Attach random branches to random subjects
-        foreach ($subjects as $subject) {
-            // Get a random number of branches to attach (between 1 and 3 for example)
-            $randomBranches = $faker->randomElements($branchIds, $faker->numberBetween(1, 18));
-            $subject->branches()->attach($randomBranches);
-        }
-
-
-/*        
-// =========================================================
-// |       Seed roles and permissions into the database    |
-// =========================================================
-*/
+        /**         
+         * =========================================================
+         * |       Seed roles and permissions into the database    |
+         * =========================================================
+         **/
 
         $this->call(RolesAndPermissionsSeeder::class);
 
@@ -129,10 +135,5 @@ class DatabaseSeeder extends Seeder
             'role' => 'super admin',
         ]);
         $admin->assignRole('super admin');
-
-
-
-
-
     }
 }

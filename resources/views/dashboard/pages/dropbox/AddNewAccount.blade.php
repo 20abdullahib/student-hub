@@ -20,6 +20,11 @@
             <div class="mb-3 mb-lg-0">
                 <h1 class="h4">Dropbox Account Setup</h1>
                 <p class="mb-0">Configure your Dropbox account integration.</p>
+                <p class="mb-0">
+                    <a href="https://free2510.github.io/dropbox-api-connection/" class="btn btn-outline-primary" target="_blank">
+                        Get Refresh Token
+                    </a>
+                </p>
             </div>
         </div>
     </div>
