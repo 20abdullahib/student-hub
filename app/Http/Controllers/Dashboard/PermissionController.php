@@ -31,21 +31,36 @@ class PermissionController extends Controller
      */
     public function storeRole(Request $request)
     {
+        // Validate the request.
+        // Note: We no longer validate uniqueness for role_name since we want to update the role if it exists.
         $validated = $request->validate([
-            'role_name'       => 'required|string|max:255|unique:roles,name',
-            'role_permissions' => 'nullable|array',
-            'role_permissions.*' => 'exists:permissions,name',
+            'role_name'         => 'required|string|max:255',
+            'role_permissions'  => 'nullable|array',
+            'role_permissions.*'=> 'exists:permissions,name',
         ]);
-
-        $role = Role::create(['name' => $validated['role_name']]);
-
-        if (!empty($validated['role_permissions'])) {
-            $role->syncPermissions($validated['role_permissions']);
+    
+        // Check if a role with the given name already exists.
+        $role = Role::where('name', $validated['role_name'])->first();
+    
+        if ($role) {
+            // Role already exists.
+            // If permissions are provided, add them to the role without removing already assigned permissions.
+            if (!empty($validated['role_permissions'])) {
+                $role->givePermissionTo($validated['role_permissions']);
+            }
+            $message = 'Role updated successfully.';
+        } else {
+            // Create a new role.
+            $role = Role::create(['name' => $validated['role_name']]);
+            if (!empty($validated['role_permissions'])) {
+                $role->syncPermissions($validated['role_permissions']);
+            }
+            $message = 'Role created successfully.';
         }
-
-        return redirect()->back()->with('success', 'Role created successfully.');
+    
+        return redirect()->back()->with('success', $message);
     }
-
+    
     /**
      * Store a newly created permission.
      */

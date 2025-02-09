@@ -1,5 +1,3 @@
-<h1>hi abdullah</h1>
-
 @extends('dashboard.layout.layout')
 
 @section('title', 'Add New Admin')

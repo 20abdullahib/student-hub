@@ -109,7 +109,9 @@
                             <th>Email</th>
                             <th>Branch</th>
                             <th>Department</th>
-                            <th>Role</th>
+                            @can('edit admins')
+                                <th>Role</th>
+                            @endcan
                             @can('delete admins')
                                 <th class="rounded-end">Actions</th>
                             @endcan
@@ -123,9 +125,9 @@
                                 <td>{{ $admin->email }}</td>
                                 <td>{{ $admin->branch->name ?? 'N/A' }}</td>
                                 <td>{{ $admin->department->name ?? 'N/A' }}</td>
-                                <td class="role-edit" data-admin-id="{{ $admin->id }}">
-                                    <span class="role-text">{{ Str::title($admin->role) }}</span>
-                                    @can('edit admins')
+                                @can('edit admins')
+                                    <td class="role-edit" data-admin-id="{{ $admin->id }}">
+                                        <span class="role-text">{{ Str::title($admin->role) }}</span>
                                         <select class="role-select form-select d-none"
                                             style="width: 10em; display: inline-block;">
                                             @foreach ($roles as $role)
@@ -135,8 +137,8 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                    @endcan
-                                </td>
+                                    </td>
+                                @endcan
                                 @can('delete admins')
                                     <td>
                                         <form action="{{ route('admin.destroy', $admin->id) }}" method="POST"

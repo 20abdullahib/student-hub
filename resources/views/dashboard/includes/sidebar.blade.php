@@ -131,11 +131,9 @@
                         data-bs-toggle="collapse" data-bs-target="#Admins">
                         <span>
                             <span class="sidebar-icon">
-                                <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 24 24"
+                                <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 448 512"
                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M7.004 3.5L2 6.689l5.004 3.191L2 13.063 7.004 16.5l5.006-3.188L17 16.5l5.004-3.188L17 10.006l5.004-3.187L17 3.5l-4.996 3.187L7.004 3.5zM2 16.689l5.004 3.188 4.996-3.188-5.004-3.187L2 16.689zm10 0l4.996 3.188 5.004-3.188-4.996-3.187L12 16.689z">
-                                    </path>
+                                    <path d="M224 256A128 128 0 1 0 96 128a128 128 0 0 0 128 128zm0 32c-63.6 0-192 32-192 96v48a16 16 0 0 0 16 16h352a16 16 0 0 0 16-16v-48c0-64-128.4-96-192-96zm-32 32h64l32 96h-16l-32-32-32 32h-16z"/>
                                 </svg>
                             </span>
                             <span class="sidebar-text">Admins</span>
