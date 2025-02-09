@@ -1,14 +1,15 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Dashboard\AdminController;
-use App\Http\Controllers\Dashboard\DashboardController;
-use App\Http\Controllers\Dashboard\DropboxController;
-use App\Http\Controllers\Website\AboutController;
-use App\Http\Controllers\Website\HomeController;
-use App\Http\Controllers\Website\ResourcesController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Website\HomeController;
+use App\Http\Controllers\Website\AboutController;
+use App\Http\Controllers\Dashboard\AdminController;
+use App\Http\Controllers\Dashboard\DropboxController;
+use App\Http\Controllers\Website\ResourcesController;
+use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Dashboard\PermissionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,14 +70,18 @@ Route::prefix('dropbox')->group(function () {
 });
 
 // Dashboard Main Routes
-Route::resource('/dashboard', DashboardController::class)->middleware(['auth:admin', 'session.timeout'])->where(['dashboard' => '^(?!admin$).*']);
 
 // Admin Routes
 Route::middleware(['auth:admin', 'session.timeout'])->group(function () {
     Route::prefix('dashboard')->group(function () {
         Route::resource('admin', AdminController::class);
+        Route::resource('permission', PermissionController::class);
+        Route::post('permission/role', [PermissionController::class, 'storeRole'])->name('permission.store.role');
+
     });
+
     Route::get('admin/search-suggestions', [AdminController::class, 'searchSuggestions'])->name('admin.search-suggestions');
+    Route::resource('/dashboard', DashboardController::class);
 });
 
 // Auth Routes

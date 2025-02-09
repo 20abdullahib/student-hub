@@ -119,7 +119,7 @@
                                 <td>{{ $admin->email }}</td>
                                 <td>{{ $admin->branch->name ?? 'N/A' }}</td>
                                 <td>{{ $admin->department->name ?? 'N/A' }}</td>
-                                <td>{{ ucfirst($admin->role) }}</td>
+                                <td>{{ Str::title($admin->role) }}</td>
                                 <td>
                                     <a href="{{ route('admin.edit', $admin->id) }}" class="btn btn-outline-primary btn-sm">
                                         Edit

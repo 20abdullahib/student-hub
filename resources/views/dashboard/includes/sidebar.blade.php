@@ -148,11 +148,11 @@
                                 <span class="sidebar-text">New Admins</span>
                             </a>
                         </li>
-                        {{-- <li class="nav-item {{ request()->routeIs('dropbox.upload.form') ? 'active' : '' }}">
-                            <a class="nav-link" href="{{ route('dropbox.upload.form') }}">
+                        <li class="nav-item {{ request()->routeIs('permission.create') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('permission.create') }}">
                                 <span class="sidebar-text">Permissions</span>
                             </a>
-                        </li> --}}
+                        </li>
                     </ul>
                 </div>
             </li>

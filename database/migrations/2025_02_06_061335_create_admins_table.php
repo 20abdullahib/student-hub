@@ -18,12 +18,13 @@ return new class extends Migration
             $table->string('password');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
             $table->foreignId('branch_id')->constrained()->onDelete('restrict');
-            $table->tinyInteger('level')->comment('1: Super Admin, 2: Editor, 3: minAdmin');
+            // $table->tinyInteger('role')->default(1);
+            $table->string('role')->default('admin');
             $table->timestamps();
         });
     }
 
-    
+
     /**
      * Reverse the migrations.
      */

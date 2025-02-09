@@ -6,6 +6,8 @@ use App\Models\Admin;
 use App\Models\Branch;
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 
 class AdminController extends Controller
@@ -105,7 +107,10 @@ class AdminController extends Controller
      */
     public function create()
     {
-        //
+        $departments = Department::all();
+        $branches = Branch::all();
+        $roles = Role::all();
+        return view('dashboard.pages.admin.AddNewAdmin', compact('departments', 'branches', 'roles'));
     }
 
     /**
@@ -113,7 +118,34 @@ class AdminController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validate the request.
+        $validated = $request->validate([
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|string|email|max:255|unique:admins',
+            'password'      => 'required|string|min:8|confirmed',
+            'department_id' => 'required|exists:departments,id',
+            'branch_id'     => 'required|exists:branches,id',
+            'role'          => 'required|exists:roles,name',
+        ]);
+
+        // Hash the password.
+        $validated['password'] = Hash::make($validated['password']);
+
+        // Create the admin record.
+        $admin = Admin::create([
+            'name'          => $validated['name'],
+            'email'         => $validated['email'],
+            'password'      => $validated['password'],
+            'department_id' => $validated['department_id'],
+            'branch_id'     => $validated['branch_id'],
+            // Optionally, if you store role in a column (even if not necessary with Spatie):
+            'role'          => $validated['role'],
+        ]);
+
+        // Assign the role using Spatie's permission package.
+        $admin->assignRole($validated['role']);
+
+        return redirect()->route('admin.index')->with('success', 'Admin created successfully.');
     }
 
     /**
