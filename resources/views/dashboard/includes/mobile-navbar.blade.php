@@ -1,6 +1,6 @@
  <!-- Mobile Navbar -->
  <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
-     <a class="navbar-brand me-lg-5" href="index.html">
+     <a class="navbar-brand me-lg-5" href="{{ route('dashboard.index')}}">
          <img class="navbar-brand-dark" src="{{ asset('assets/Dashboard/images/logo-magic.svg') }}" alt="Magic logo" />
      </a>
      <div class="d-flex align-items-center">

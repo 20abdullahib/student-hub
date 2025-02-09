@@ -2,14 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
+use App\Models\Admin;
 use App\Models\Branch;
 use App\Models\Department;
-use App\Models\Generation;
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
+use App\Models\Generation;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,7 +26,12 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        // Insert default department data
+        /*        
+// ==================================================
+// |       Insert default department data           |
+// ==================================================
+*/
+
         Department::insert([
             ['name' => 'Mathematics', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Physics', 'created_at' => now(), 'updated_at' => now()],
@@ -35,7 +41,11 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Animals', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // Insert all branches into the database
+        /*        
+// =========================================================
+// |       Insert all branches into the database           |
+// =========================================================
+*/
         Branch::insert([
             ['name' => 'Mathematics', 'department_id' => 1], // Mathematics
             ['name' => 'Mathematics and Physics', 'department_id' => 1],
@@ -57,7 +67,11 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Insect Chemistry', 'department_id' => 6],
         ]);
 
-
+        /*        
+// ========================================
+// |        Insert generations            |
+// ========================================
+*/
         $years = range(2020, 2030); // Insert for 2020, 2021, 2022, 2023
         $peoplePerYear = 10;
         $branchIds = range(1, 18); // Assuming you have 18 branches
@@ -78,10 +92,17 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        /*        
+// ==========================================================================
+// |        Seed the subjects and attach random branches to them.           |
+// ==========================================================================
+*/
         $this->call(SubjectSeeder::class);
 
         // Fetch all subjects
         $subjects = \App\Models\Subject::all();
+
+
 
         // Attach random branches to random subjects
         foreach ($subjects as $subject) {
@@ -89,6 +110,28 @@ class DatabaseSeeder extends Seeder
             $randomBranches = $faker->randomElements($branchIds, $faker->numberBetween(1, 18));
             $subject->branches()->attach($randomBranches);
         }
+
+
+/*        
+// =========================================================
+// |       Seed roles and permissions into the database    |
+// =========================================================
+*/
+
+        $this->call(RolesAndPermissionsSeeder::class);
+
+        $admin = Admin::create([
+            'name' => 'admin',
+            'email' => 'admin@admin.com',
+            'password' => bcrypt('#bom123456'),
+            'department_id' => 1,
+            'branch_id' => 1,
+            'role' => 'super admin',
+        ]);
+
+        // $admin->assignRole('');
+
+
 
     }
 }
