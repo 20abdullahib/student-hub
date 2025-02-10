@@ -92,10 +92,10 @@
                         </svg>
                     </span>
                 </span>
-                @hasanyrole('super admin|admin')
                     <div class="multi-level collapse {{ request()->is('dashboard/dropbox*') ? 'show' : '' }}" role="list"
                         id="Dropbox" aria-expanded="{{ request()->is('dashboard/dropbox*') ? 'true' : 'false' }}">
                         <ul class="flex-column nav">
+                            @hasanyrole('super admin|admin')
                             <li class="nav-item {{ request()->routeIs('dropbox.account.index') ? 'active' : '' }}">
                                 <a class="nav-link" href="{{ route('dropbox.account.index') }}">
                                     <span class="sidebar-text">Accounts</span>
@@ -106,6 +106,7 @@
                                     <span class="sidebar-text">New Account</span>
                                 </a>
                             </li>
+                            @endhasanyrole
                             @hasanyrole('super admin|admin|editor')
                                 <li class="nav-item {{ request()->routeIs('dropbox.upload.form') ? 'active' : '' }}">
                                     <a class="nav-link" href="{{ route('dropbox.upload.form') }}">
@@ -120,7 +121,6 @@
                             @endrole
                         </ul>
                     </div>
-                @endhasanyrole
             </li>
 
             <!-- Admins -->

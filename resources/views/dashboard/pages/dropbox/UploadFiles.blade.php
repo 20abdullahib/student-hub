@@ -45,7 +45,9 @@
                             <select id="subject" name="subject_id" class="form-select" required>
                                 <option value="" disabled selected>Select a subject</option>
                                 @foreach ($subjects as $subject)
-                                    <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                    @if ($subject->department_id == $admin->department_id)
+                                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>

@@ -94,10 +94,10 @@ class DropboxController extends Controller
     // File Management
     public function showUploadForm()
     {
-        return view('dashboard.pages.dropbox.UplaodFiles', [
-            'departments' => Department::all(),
-            'subjects' => Subject::all(),
-        ]);
+        $admin = auth('admin')->user();
+        $departments = Department::all();
+        $subjects = Subject::all();
+        return view('dashboard.pages.dropbox.UploadFiles', compact('admin', 'departments', 'subjects'));
     }
 
     public function storeFileDetails(Request $request)
