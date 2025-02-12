@@ -2,22 +2,157 @@
 
 namespace App\Http\Controllers\Website;
 
-use App\Http\Controllers\Controller;
-use App\Models\Department;
+use App\Models\File;
+use App\Models\Branch;
 use App\Models\Subject;
-use Illuminate\Support\Facades\DB;
+use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 
 
 class ResourcesController extends Controller
 {
     public function index()
     {
-        $subjects = DB::table('subjects')->get();
-        $departments = DB::table('departments')->get();
-        $branches = DB::table('branches')->get();
+        // Eager load files with their relationships and paginate the results
+        $subjects = Subject::with(['files' => function ($query) {
+            $query->orderBy('path'); // Order files by path for proper grouping
+        }])->paginate(30); // Change 10 to however many subjects you want per page
+    
+        $departments = Department::all();
+        $branches = Branch::all();
+    
         return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches'));
     }
+    public function show($id, Request $request)
+    {
+        // Load the subject along with its files.
+        $subject = Subject::with('files')->findOrFail($id);
+
+        // Build a folder tree from the subject's files.
+        // The second argument (true) tells the function to remove the first folder.
+        $tree = $this->buildTree($subject->files, true);
+
+        // Get the current folder path from the request.
+        $currentFolderPath = $request->get('folder', '');
+
+        // Retrieve the "current" node from the tree (the part corresponding to the current folder)
+        $currentNode = $this->getCurrentNode($tree, $currentFolderPath);
+
+        // Build breadcrumbs for navigation (optional).
+        $breadcrumbs = $this->buildBreadcrumbs($subject->id, $currentFolderPath);
+
+        return view('website.pages.resource.partials.nested-folders', compact(
+            'subject',
+            'tree',
+            'currentNode',
+            'currentFolderPath',
+            'breadcrumbs'
+        ));
+    }
+
+    /**
+     * Build a nested tree from a flat list of files.
+     *
+     * @param \Illuminate\Support\Collection $files
+     * @param bool $removeFirstFolder  If true, the first folder (assumed to be the subject's folder) is removed.
+     * @return array
+     */
+    private function buildTree($files, $removeFirstFolder = false)
+    {
+        $tree = [];
+        foreach ($files as $file) {
+            // Trim any leading/trailing slashes and whitespace.
+            $trimmedPath = trim($file->path, "/ \t\n\r\0\x0B");
+            if ($trimmedPath === '') {
+                // File in the root (no folder)
+                $tree['_files'][] = $file;
+            } else {
+                $parts = explode('/', $trimmedPath);
+
+                // Optionally remove the first folder (subject folder)
+                if ($removeFirstFolder && count($parts) > 0) {
+                    array_shift($parts);
+                }
+
+                // If after removal no folder remains, file is at root.
+                if (count($parts) === 0 || count($parts) === 1) {
+                    $tree['_files'][] = $file;
+                } else {
+                    // The last element is the file name; the preceding elements are folder names.
+                    $folderParts = array_slice($parts, 0, -1);
+                    $current = &$tree;
+                    foreach ($folderParts as $folder) {
+                        if (!isset($current[$folder])) {
+                            $current[$folder] = [];
+                        }
+                        $current = &$current[$folder];
+                    }
+                    if (!isset($current['_files'])) {
+                        $current['_files'] = [];
+                    }
+                    $current['_files'][] = $file;
+                }
+            }
+        }
+        return $tree;
+    }
+
+    /**
+     * Retrieve the node within the tree corresponding to the current folder path.
+     *
+     * @param array $tree
+     * @param string $folderPath  e.g. "Subfolder1/Subfolder2"
+     * @return array
+     */
+    private function getCurrentNode($tree, $folderPath)
+    {
+        $current = $tree;
+        if ($folderPath !== '') {
+            $parts = explode('/', $folderPath);
+            foreach ($parts as $part) {
+                if (isset($current[$part])) {
+                    $current = $current[$part];
+                } else {
+                    // Folder not found—return an empty array.
+                    return [];
+                }
+            }
+        }
+        return $current;
+    }
+
+    /**
+     * Build breadcrumb data for navigation.
+     *
+     * @param int $subjectId
+     * @param string $folderPath
+     * @return array
+     */
+    private function buildBreadcrumbs($subjectId, $folderPath)
+    {
+        $breadcrumbs = [];
+        // Home always links to the subject view with no folder
+        $breadcrumbs[] = [
+            'label' => 'Home',
+            'url'   => route('resources.subjects.show', $subjectId)
+        ];
+
+        if ($folderPath !== '') {
+            $parts = explode('/', $folderPath);
+            $accumulated = '';
+            foreach ($parts as $part) {
+                $accumulated = $accumulated ? $accumulated . '/' . $part : $part;
+                $breadcrumbs[] = [
+                    'label' => $part,
+                    'url'   => route('resources.subjects.show', $subjectId) . '?folder=' . urlencode($accumulated)
+                ];
+            }
+        }
+        return $breadcrumbs;
+    }
+    
 
     // public function show($subject)
     // {
@@ -129,6 +264,31 @@ class ResourcesController extends Controller
         return view('website.pages.resource.resources', compact( 'subjects', 'departments', 'branches', 'query'));
     }
     
+    public function preview($fileId)
+    {
+        $file = File::where('file_id', $fileId)->firstOrFail();
+
+        if (!$file->rlkey) {
+            abort(404, 'Shared link is not available for this file.');
+        }
+
+        // Construct the preview link
+        $previewLink = "https://www.dropbox.com/scl/fi/{$file->file_id}?rlkey={$file->rlkey}&e=1&dl=0";
+        return redirect($previewLink);
+    }
+
+    public function download($fileId)
+    {
+        $file = File::where('file_id', $fileId)->firstOrFail();
+
+        if (!$file->rlkey) {
+            abort(404, 'Shared link is not available for this file.');
+        }
+
+        // Construct the download link
+        $downloadLink = "https://www.dropbox.com/scl/fi/{$file->file_id}?rlkey={$file->rlkey}&e=1&dl=1";
+        return redirect($downloadLink);
+    }
 
 
 }

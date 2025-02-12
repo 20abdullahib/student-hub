@@ -262,7 +262,8 @@ const UploadController = (() => {
         subject_id: subjectId,
         dropbox_account_id: account.id,
         link: sharedLink.url,
-        file_id: sharedLink.url.split('/scl/fi/')[1]?.split('/')[0] || ''
+        file_id: sharedLink.url.split('/scl/fi/')[1]?.split('/')[0] || '',
+        rlkey: sharedLink.url.split('rlkey=')[1]?.split('&')[0] || ''
       });
 
       await updateAccountSpace(client, account.id);

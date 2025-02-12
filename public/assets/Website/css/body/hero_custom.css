@@ -777,16 +777,31 @@ body {
     background-color: rgba(0, 0, 0, 0.226);
 } */
 
-#resource-suggestions-container {
-    top: 58px;
+/* #resource-suggestions-container {
+    top: 120px;
     margin-top: 0;
     max-width: 36em !important;
+} */
+#resource-suggestions-container {
+    max-height: 15rem !important;
+    overflow-y: scroll;
+    margin-top: 0;
+    width: 100%;
 }
 
-#home-suggestions-container .suggestion-item:hover,
+/* #home-suggestions-container .suggestion-item:hover,
 #header-suggestions-container>div:hover,
 #resource-suggestions-container .suggestion-item:hover {
     background-color: rgba(0, 0, 0, 0.226) !important;
+} */
+
+#header-suggestions-container>div:hover {
+    background-color: rgba(0, 0, 0, 0.226) !important;
+}
+
+#resource-suggestions-container .suggestion-item:hover,
+#home-suggestions-container .suggestion-item:hover {
+    background-color: #ade1f5 !important;
 }
 
 @media (max-width: 420px) {
@@ -798,35 +813,40 @@ body {
 }
 
 
-body > div > section > div {
+body>div>section>div {
     padding: 0 1em;
     padding-top: 2em;
 }
 
 @media (min-width: 576px) {
-    body > div > section > div {
+    body>div>section>div {
         padding: 0 2em;
+    }
+
+    #resource-suggestions-container {
+        width: 75%;
     }
 }
 
 @media (min-width: 768px) {
-    body > div > section > div {
-        padding: 0 5em;
+    body>div>section>div {
+        padding: 0 3em;
     }
 }
 
 @media (min-width: 992px) {
-    body > div > section > div {
-        padding: 0 10em;
+    body>div>section>div {
+        padding: 0 2em;
     }
 }
 
 @media (min-width: 1200px) {
-    body > div > section > div {
-        padding: 0 15em;
+    body>div>section>div {
+        padding: 0 5em;
     }
 }
-body > div > section > div > div.card-header.d-lg-flex.align-items-center.justify-content-between.position-relative{
+
+body>div>section>div>div.card-header.d-lg-flex.align-items-center.justify-content-between.position-relative {
     background: none;
 }
 

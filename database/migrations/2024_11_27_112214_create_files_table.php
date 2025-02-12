@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('path'); // Dropbox path
             $table->string('link')->nullable(); // Shared link
             $table->string('file_id')->nullable(); // Shared link code
+            $table->string('rlkey')->nullable(); // Security key for Dropbox shared links
             $table->unsignedBigInteger('size'); // File size in bytes
             $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade'); // Belongs to a subject
             $table->foreignId('dropbox_account_id')->constrained('dropbox_accounts')->onDelete('cascade'); // Stored in an account

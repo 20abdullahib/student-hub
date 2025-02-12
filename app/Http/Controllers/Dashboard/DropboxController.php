@@ -110,6 +110,7 @@ class DropboxController extends Controller
             'dropbox_account_id' => 'required|exists:dropbox_accounts,id',
             'link' => 'required|string',
             'file_id' => 'required|string',
+            'rlkey' => 'required|string',
         ]));
 
         return response()->json(['message' => 'File details saved']);

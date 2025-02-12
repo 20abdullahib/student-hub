@@ -29,5 +29,10 @@ class Subject extends Model
     {
         return $this->belongsToMany(Branch::class, 'branch_subject');
     }
+    public function files()
+    {
+        return $this->hasMany(File::class);
+    }
+
 
 }
