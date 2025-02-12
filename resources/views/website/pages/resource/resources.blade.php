@@ -44,16 +44,11 @@
                             </div>
                         @endforeach
                     </div>
-
                     <!-- Pagination Links -->
                     <div class="d-flex justify-content-center mt-4">
                         {{ $subjects->links() }}
                     </div>
                 </div>
-
-
-
-
             </div>
         </div>
     </div>

@@ -2,50 +2,54 @@
 
 namespace App\Http\Controllers\Website;
 
+use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Branch;
 use App\Models\Subject;
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-
 
 class ResourcesController extends Controller
 {
+    /**
+     * Display a paginated list of subjects with their files.
+     */
     public function index()
     {
-        // Eager load files with their relationships and paginate the results
+        // Eager load files (ordering them by path) and paginate the subjects.
         $subjects = Subject::with(['files' => function ($query) {
-            $query->orderBy('path'); // Order files by path for proper grouping
-        }])->paginate(30); // Change 10 to however many subjects you want per page
-    
+            $query->orderBy('path');
+        }])->paginate(30);
+
         $departments = Department::all();
-        $branches = Branch::all();
-    
+        $branches    = Branch::all();
+
         return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches'));
     }
-    public function show($id, Request $request)
+
+    /**
+     * Show the nested folder view for a given subject.
+     *
+     * @param int $id
+     * @param Request $request
+     */
+    public function show(int $id, Request $request)
     {
         // Load the subject along with its files.
         $subject = Subject::with('files')->findOrFail($id);
 
-        // Build a folder tree from the subject's files.
-        // The second argument (true) tells the function to remove the first folder.
+        // Build the folder tree (removing the first folder if needed).
         $tree = $this->buildTree($subject->files, true);
 
-        // Get the current folder path from the request.
+        // Determine the current folder path (if any).
         $currentFolderPath = $request->get('folder', '');
+        $currentNode       = $this->getCurrentNode($tree, $currentFolderPath);
+        $breadcrumbs       = $this->buildBreadcrumbs($subject->id, $currentFolderPath);
 
-        // Retrieve the "current" node from the tree (the part corresponding to the current folder)
-        $currentNode = $this->getCurrentNode($tree, $currentFolderPath);
-
-        // Build breadcrumbs for navigation (optional).
-        $breadcrumbs = $this->buildBreadcrumbs($subject->id, $currentFolderPath);
-
-        // Load departments and branches for the header.
         $departments = Department::all();
-        $branches = Branch::all();
+        $branches    = Branch::all();
 
         return view('website.pages.resource.partials.nested-folders', compact(
             'subject',
@@ -61,58 +65,54 @@ class ResourcesController extends Controller
     /**
      * Build a nested tree from a flat list of files.
      *
-     * @param \Illuminate\Support\Collection $files
-     * @param bool $removeFirstFolder  If true, the first folder (assumed to be the subject's folder) is removed.
+     * @param Collection $files
+     * @param bool $removeFirstFolder
      * @return array
      */
-    private function buildTree($files, $removeFirstFolder = false)
+    private function buildTree(Collection $files, bool $removeFirstFolder = false): array
     {
         $tree = [];
         foreach ($files as $file) {
-            // Trim any leading/trailing slashes and whitespace.
             $trimmedPath = trim($file->path, "/ \t\n\r\0\x0B");
             if ($trimmedPath === '') {
-                // File in the root (no folder)
+                // File is in the root directory.
                 $tree['_files'][] = $file;
             } else {
                 $parts = explode('/', $trimmedPath);
 
-                // Optionally remove the first folder (subject folder)
                 if ($removeFirstFolder && count($parts) > 0) {
                     array_shift($parts);
                 }
 
-                // If after removal no folder remains, file is at root.
+                // If no folder remains or just one part remains, treat the file as in the root.
                 if (count($parts) === 0 || count($parts) === 1) {
                     $tree['_files'][] = $file;
                 } else {
-                    // The last element is the file name; the preceding elements are folder names.
+                    // Traverse or create the nested folder structure.
                     $folderParts = array_slice($parts, 0, -1);
-                    $current = &$tree;
+                    $current     = &$tree;
                     foreach ($folderParts as $folder) {
                         if (!isset($current[$folder])) {
                             $current[$folder] = [];
                         }
                         $current = &$current[$folder];
                     }
-                    if (!isset($current['_files'])) {
-                        $current['_files'] = [];
-                    }
                     $current['_files'][] = $file;
                 }
             }
         }
+
         return $tree;
     }
 
     /**
-     * Retrieve the node within the tree corresponding to the current folder path.
+     * Retrieve the tree node corresponding to the current folder path.
      *
      * @param array $tree
-     * @param string $folderPath  e.g. "Subfolder1/Subfolder2"
+     * @param string $folderPath
      * @return array
      */
-    private function getCurrentNode($tree, $folderPath)
+    private function getCurrentNode(array $tree, string $folderPath): array
     {
         $current = $tree;
         if ($folderPath !== '') {
@@ -121,180 +121,171 @@ class ResourcesController extends Controller
                 if (isset($current[$part])) {
                     $current = $current[$part];
                 } else {
-                    // Folder not found—return an empty array.
-                    return [];
+                    return []; // Folder not found.
                 }
             }
         }
+
         return $current;
     }
 
     /**
-     * Build breadcrumb data for navigation.
+     * Build breadcrumb links for navigation.
      *
      * @param int $subjectId
      * @param string $folderPath
      * @return array
      */
-    private function buildBreadcrumbs($subjectId, $folderPath)
+    private function buildBreadcrumbs(int $subjectId, string $folderPath): array
     {
-        $breadcrumbs = [];
-        // Home always links to the subject view with no folder
-        $breadcrumbs[] = [
-            'label' => 'Home',
-            'url'   => route('resources.index', $subjectId)
+        $breadcrumbs = [
+            [
+                'label' => 'Resources',
+                'url'   => route('resources.index', $subjectId)
+            ]
         ];
 
         if ($folderPath !== '') {
-            $parts = explode('/', $folderPath);
+            $parts       = explode('/', $folderPath);
             $accumulated = '';
             foreach ($parts as $part) {
-                $accumulated = $accumulated ? $accumulated . '/' . $part : $part;
+                $accumulated .= ($accumulated ? '/' : '') . $part;
                 $breadcrumbs[] = [
                     'label' => $part,
                     'url'   => route('resources.subjects.show', $subjectId) . '?folder=' . urlencode($accumulated)
                 ];
             }
         }
+
         return $breadcrumbs;
     }
-    
 
-    // public function show($subject)
-    // {
-    //     return view('website.pages.resources.show', ['subject' => $subject]);
-    // }
-
+    /**
+     * Return subject suggestions based on a query.
+     */
     public function getSuggestions(Request $request)
     {
         $query = $request->input('query');
-
-        // Fetch subjects based on name or code
         $subjects = Subject::where('name', 'LIKE', "%{$query}%")
             ->orWhere('code', 'LIKE', "%{$query}%")
-            ->get(['name', 'code']); // Return only necessary fields
+            ->get(['name', 'code']);
 
-        return response()->json($subjects); // Return suggestions as JSON
+        return response()->json($subjects);
     }
 
+    /**
+     * Search subjects by name or code.
+     */
     public function search(Request $request)
     {
         $query = $request->input('query');
-
-        // Search for subjects by name or code
         $subjects = Subject::where('name', 'LIKE', "%{$query}%")
             ->orWhere('code', 'LIKE', "%{$query}%")
             ->get();
 
-
-
-        // Check if the request expects JSON (for AJAX/live search)
         if ($request->expectsJson()) {
             return response()->json($subjects);
-        } else {
-
-            $departments = DB::table('departments')->get();
-            $branches = DB::table('branches')->get();
-            // If it's a standard request, return resources.index view with subjects data
-            return view('website.pages.resource.resources', ['subjects' => $subjects], compact('departments', 'branches', 'query'));
         }
+
+        $departments = DB::table('departments')->get();
+        $branches    = DB::table('branches')->get();
+
+        return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches', 'query'));
     }
 
-
-
+    /**
+     * Filter subjects based on department, branch, and sort options.
+     */
     public function filterData(Request $request)
     {
         $query = Subject::query();
 
-        // Apply filters if they exist
         if ($request->filled('department')) {
             $query->where('department_id', $request->department);
         }
 
         if ($request->filled('branch')) {
-            // Use whereHas to filter subjects that are associated with the specified branch
-            $query->whereHas('branches', function ($query) use ($request) {
-                $query->where('branch_id', $request->branch);
+            $query->whereHas('branches', function ($q) use ($request) {
+                $q->where('branch_id', $request->branch);
             });
         }
 
-        // Apply sorting
         if ($request->filled('sort')) {
-            if ($request->sort == 'Newest') {
-                $query->orderBy('created_at', 'desc');
-            } elseif ($request->sort == 'Oldest') {
-                $query->orderBy('created_at', 'asc');
-            }
+            $query->orderBy('created_at', $request->sort === 'Newest' ? 'desc' : 'asc');
         }
 
-        // Fetch filtered results
         $subjects = $query->get();
 
-        // Check if the request is AJAX
         if ($request->ajax()) {
-            // Return JSON response for AJAX request
             return response()->json($subjects);
-        } else {
-            // Return view for regular requests with filtered data
-            $departments = DB::table('departments')->get();
-            $branches = DB::table('branches')->get();
-
-            return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches'));
         }
-    }
 
-    public function filterDataDepartmentBranch($department, $branch = null)
-    {
-        // Fetch the department by ID
-        $departmentData = Department::findOrFail($department);
         $departments = DB::table('departments')->get();
-        $branches = DB::table('branches')->get();
-        
-        // Prepare the subjects collection
-        $subjects = collect();
-    
+        $branches    = DB::table('branches')->get();
+
+        return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches'));
+    }
+
+    /**
+     * Filter subjects by department and optional branch.
+     *
+     * @param int $department
+     * @param int|null $branch
+     */
+    public function filterDataDepartmentBranch(int $department, ?int $branch = null)
+    {
+        $departmentData = Department::findOrFail($department);
+        $departments    = DB::table('departments')->get();
+        $branches       = DB::table('branches')->get();
+        $subjects       = collect();
+
         if ($branch) {
-            // If a branch is provided, fetch the specific branch
             $branchData = $departmentData->branches()->findOrFail($branch);
-            // Get subjects related to the specific branch
-            $subjects = $branchData->subjects;
-            $query = $departmentData->branches()->where('id', $branch)->pluck('name')->first();
-            return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches', 'query'));
+            $subjects   = $branchData->subjects;
+            $query      = $departmentData->branches()->where('id', $branch)->pluck('name')->first();
+        } else {
+            $subjects = Subject::where('department_id', $department)->get();
+            $query    = $departmentData->name;
         }
-    
-        // If no branch is provided, get subjects directly related to the department
-        $subjects = Subject::where('department_id', $department)->get();
-        
-        $query = $departmentData->name;
 
-        return view('website.pages.resource.resources', compact( 'subjects', 'departments', 'branches', 'query'));
+        return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches', 'query'));
     }
-    
-    public function preview($fileId)
+
+    /**
+     * Redirect to the Dropbox preview URL for a file.
+     *
+     * @param string $fileId
+     */
+    public function preview(string $fileId)
     {
         $file = File::where('file_id', $fileId)->firstOrFail();
+        return redirect($this->getDropboxLink($file, 0));
+    }
 
+    /**
+     * Redirect to the Dropbox download URL for a file.
+     *
+     * @param string $fileId
+     */
+    public function download(string $fileId)
+    {
+        $file = File::where('file_id', $fileId)->firstOrFail();
+        return redirect($this->getDropboxLink($file, 1));
+    }
+
+    /**
+     * Build the Dropbox URL for preview or download.
+     *
+     * @param File $file
+     * @param int $downloadFlag 0 for preview, 1 for download.
+     * @return string
+     */
+    private function getDropboxLink(File $file, int $downloadFlag): string
+    {
         if (!$file->rlkey) {
             abort(404, 'Shared link is not available for this file.');
         }
 
-        // Construct the preview link
-        $previewLink = "https://www.dropbox.com/scl/fi/{$file->file_id}?rlkey={$file->rlkey}&e=1&dl=0";
-        return redirect($previewLink);
+        return "https://www.dropbox.com/scl/fi/{$file->file_id}?rlkey={$file->rlkey}&e=1&dl={$downloadFlag}";
     }
-
-    public function download($fileId)
-    {
-        $file = File::where('file_id', $fileId)->firstOrFail();
-
-        if (!$file->rlkey) {
-            abort(404, 'Shared link is not available for this file.');
-        }
-
-        // Construct the download link
-        $downloadLink = "https://www.dropbox.com/scl/fi/{$file->file_id}?rlkey={$file->rlkey}&e=1&dl=1";
-        return redirect($downloadLink);
-    }
-
-
 }

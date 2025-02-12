@@ -255,8 +255,8 @@ Route::prefix('resources')->group(function () {
     Route::get('/filter/{department}/{branch?}', [ResourcesController::class, 'filterDataDepartmentBranch'])
         ->name('resources.filter.departmentbranch');
 
-    Route::get('/file/preview/{fileId}', [ResourcesController::class, 'preview'])->name('file.preview');
     Route::get('/file/download/{fileId}', [ResourcesController::class, 'download'])->name('file.download');
+    Route::get('/file/preview/{fileId}', [ResourcesController::class, 'preview'])->name('file.preview');
     Route::get('/{id}', [ResourcesController::class, 'show'])->name('resources.subjects.show');
 });
 
