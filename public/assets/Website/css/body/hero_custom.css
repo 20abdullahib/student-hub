@@ -854,3 +854,40 @@ body>div>section>div>div.card-header.d-lg-flex.align-items-center.justify-conten
     padding: 10px;
     background-color: #f8f9fa;
 } */
+
+
+.file-card {
+    border: 2px solid #0d6efd;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.file-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+.file-icon {
+    font-size: 4rem;
+    color: #0d6efd;
+}
+
+.file-details {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Folder Card Styling */
+.folder-card {
+    border: 2px solid #0d6efd; /* Blue border */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+}
+
+/* Hover Effect */
+.folder-card:hover {
+    transform: translateY(-10px); /* Slightly lift the card */
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}

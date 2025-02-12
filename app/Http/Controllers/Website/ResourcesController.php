@@ -43,12 +43,18 @@ class ResourcesController extends Controller
         // Build breadcrumbs for navigation (optional).
         $breadcrumbs = $this->buildBreadcrumbs($subject->id, $currentFolderPath);
 
+        // Load departments and branches for the header.
+        $departments = Department::all();
+        $branches = Branch::all();
+
         return view('website.pages.resource.partials.nested-folders', compact(
             'subject',
             'tree',
             'currentNode',
             'currentFolderPath',
-            'breadcrumbs'
+            'breadcrumbs',
+            'departments',
+            'branches'
         ));
     }
 
@@ -136,7 +142,7 @@ class ResourcesController extends Controller
         // Home always links to the subject view with no folder
         $breadcrumbs[] = [
             'label' => 'Home',
-            'url'   => route('resources.subjects.show', $subjectId)
+            'url'   => route('resources.index', $subjectId)
         ];
 
         if ($folderPath !== '') {

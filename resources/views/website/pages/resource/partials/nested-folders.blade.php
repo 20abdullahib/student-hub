@@ -181,84 +181,100 @@
 
 @section('content')
     <div class="container mt-5">
-        <h1>{{ $subject->name }}</h1>
-        <p>{{ $subject->description ?? 'No description available.' }}</p>
+        <div class="card">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h3>Resources: {{ $subject->name }}</h3>
+                <p>{{ $subject->description ?? 'No description available.' }}</p>
+            </div>
+            <div class="card-body">
+                @include('website.pages.resource.includes.header-search')
+                <!-- Breadcrumb Navigation -->
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb mb-5">
+                        @foreach ($breadcrumbs as $crumb)
+                            <li class="breadcrumb-item">
+                                <a href="{{ $crumb['url'] }}">{{ $crumb['label'] }}</a>
+                            </li>
+                        @endforeach
+                    </ol>
+                </nav>
 
-        <!-- Breadcrumb Navigation -->
-        <nav aria-label="breadcrumb" class="mb-3">
-            <ol class="breadcrumb">
-                @foreach ($breadcrumbs as $crumb)
-                    <li class="breadcrumb-item">
-                        <a href="{{ $crumb['url'] }}">{{ $crumb['label'] }}</a>
-                    </li>
-                @endforeach
-            </ol>
-        </nav>
-
-        <!-- Display Folder Cards -->
-        <div class="row">
-            @foreach ($currentNode as $key => $node)
-                @if ($key !== '_files')
-                    @php
-                        // Build the new folder path (append current folder path with the folder name)
-                        $newFolderPath = ($currentFolderPath ? $currentFolderPath . '/' : '') . $key;
-                    @endphp
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <div class="card-body d-flex align-items-center">
-                                <i class="bi bi-folder-fill text-primary me-3" style="font-size:1.5rem;"></i>
-                                <a href="{{ route('resources.subjects.show', $subject->id) }}?folder={{ urlencode($newFolderPath) }}"
-                                    class="stretched-link text-decoration-none">
-                                    {{ $key }}
-                                </a>
+                <!-- Display Folder Cards -->
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+                    @foreach ($currentNode as $key => $node)
+                        @if ($key !== '_files')
+                            @php
+                                // Build the new folder path (append current folder path with the folder name)
+                                $newFolderPath = ($currentFolderPath ? $currentFolderPath . '/' : '') . $key;
+                            @endphp
+                            <div class="col">
+                                <div class="card folder-card h-100 text-center p-4">
+                                    <!-- Folder Icon -->
+                                    <i class="bi bi-folder-fill display-4 text-primary"></i>
+                                    <!-- Card Body -->
+                                    <div class="card-body">
+                                        <!-- Replace the route name and parameter as needed -->
+                                        <a href="{{ route('resources.subjects.show', $subject->id) }}?folder={{ urlencode($newFolderPath) }}"
+                                            class="stretched-link text-decoration-none">
+                                            {{ $key }}
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        @endif
+                    @endforeach
+                </div>
+
+                <!-- Display Files -->
+                @if (isset($currentNode['_files']) && count($currentNode['_files']) > 0)
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                        @foreach ($currentNode['_files'] as $file)
+                            @php
+                                // Choose an icon based on the file extension.
+                                $extension = strtolower(pathinfo($file->name, PATHINFO_EXTENSION));
+                                $iconClass = 'bi bi-file-earmark-text-fill';
+                                if ($extension === 'pdf') {
+                                    $iconClass = 'bi bi-file-earmark-pdf-fill';
+                                } elseif (in_array($extension, ['xlsx', 'xls'])) {
+                                    $iconClass = 'bi bi-file-earmark-spreadsheet-fill';
+                                } elseif (in_array($extension, ['doc', 'docx'])) {
+                                    $iconClass = 'bi bi-file-earmark-word-fill';
+                                } elseif (in_array($extension, ['zip', 'rar'])) {
+                                    $iconClass = 'bi bi-file-earmark-zip-fill';
+                                } elseif (in_array($extension, ['png', 'jpg', 'jpeg', 'gif'])) {
+                                    $iconClass = 'bi bi-images';
+                                }
+
+                                // Format the file size.
+                                $size = $file->size;
+                                $sizeFormatted =
+                                    $size >= 1024 * 1024
+                                        ? round($size / (1024 * 1024), 2) . ' MB'
+                                        : round($size / 1024, 2) . ' KB';
+                            @endphp
+
+                            <div class="col">
+                                <div class="card file-card h-100 text-center p-4 border rounded shadow-sm">
+                                    <i class="{{ $iconClass }} file-icon d-block mx-auto mb-3"
+                                        style="font-size: 2rem;"></i>
+                                    <div class="card-body">
+                                        <h5 class="card-title text-truncate">{{ $file->name }}</h5>
+                                        <p class="file-details small text-muted">
+                                            Size: {{ $sizeFormatted }} | Type: {{ strtoupper($extension) }}
+                                        </p>
+                                        <div class="d-flex justify-content-center mt-3">
+                                            <a href="{{ $file->link ?? '#' }}" class="btn btn-primary btn-sm me-2"
+                                                target="_blank" aria-label="Preview {{ $file->name }}">Preview</a>
+                                            <a href="{{ $file->link ?? '#' }}" class="btn btn-success btn-sm" download
+                                                aria-label="Download {{ $file->name }}">Download</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
-            @endforeach
-        </div>
-
-        <!-- Display Files -->
-        @if (isset($currentNode['_files']) && count($currentNode['_files']) > 0)
-            <div class="list-group mt-4">
-                @foreach ($currentNode['_files'] as $file)
-                    @php
-                        // Choose an icon based on the file extension.
-                        $extension = strtolower(pathinfo($file->name, PATHINFO_EXTENSION));
-                        $iconClass = 'bi bi-file-earmark-text';
-                        if ($extension === 'pdf') {
-                            $iconClass = 'bi bi-file-earmark-pdf';
-                        } elseif (in_array($extension, ['xlsx', 'xls'])) {
-                            $iconClass = 'bi bi-file-earmark-spreadsheet';
-                        } elseif (in_array($extension, ['doc', 'docx'])) {
-                            $iconClass = 'bi bi-file-earmark-word';
-                        } elseif (in_array($extension, ['zip', 'rar'])) {
-                            $iconClass = 'bi bi-file-earmark-zip';
-                        } elseif (in_array($extension, ['png', 'jpg', 'jpeg', 'gif'])) {
-                            $iconClass = 'bi bi-images';
-                        }
-
-                        // Format the file size.
-                        $size = $file->size;
-                        $sizeFormatted =
-                            $size >= 1024 * 1024
-                                ? round($size / (1024 * 1024), 2) . ' MB'
-                                : round($size / 1024, 2) . ' KB';
-                    @endphp
-
-                    <a href="{{ $file->link ?? '#' }}"
-                        class="list-group-item list-group-item-action file-card d-flex align-items-center">
-                        <i class="{{ $iconClass }} file-icon me-3" style="font-size:1.5rem;"></i>
-                        <div class="flex-grow-1">
-                            <h5 class="mb-1">{{ $file->name }}</h5>
-                            <p class="mb-0 text-muted">Size: {{ $sizeFormatted }} | Type: {{ strtoupper($extension) }}</p>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-primary ms-3">Download</button>
-                    </a>
-                @endforeach
             </div>
-        @else
-            <p>No files in this folder.</p>
-        @endif
+        </div>
     </div>
 @endsection
