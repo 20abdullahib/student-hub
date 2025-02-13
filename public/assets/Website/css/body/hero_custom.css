@@ -891,3 +891,12 @@ body>div>section>div>div.card-header.d-lg-flex.align-items-center.justify-conten
     transform: translateY(-10px); /* Slightly lift the card */
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
 }
+
+/* search clear Icon Styling */
+#clear-resource-search {
+    right: 5rem !important;
+}
+
+#clear-home-search {
+    right: 7rem !important;
+}

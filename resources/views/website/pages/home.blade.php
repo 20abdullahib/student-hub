@@ -19,10 +19,16 @@
                         <div class="d-flex flex-column gap-3">
                             <form id="search-form" onsubmit="return false;">
                                 @csrf
-                                <div class="input-group mb-3">
+                                <div class="input-group mb-3 position-relative">
                                     <input type="text" id="home-search" class="form-control form-control-lg"
                                         placeholder="Search by code or name of subject"
-                                        aria-label="Search by code or name of subject" aria-describedby="basic-addon2">
+                                        aria-label="Search by code or name of subject" aria-describedby="basic-addon2"
+                                        oninput="toggleClearIcon()">
+                                    <!-- Clear Icon Inside Input -->
+                                    <span class="position-absolute top-50 translate-middle-y end-0 me-3 d-none"
+                                        style="z-index: 10; cursor: pointer;" id="clear-home-search" onclick="clearSearch()">
+                                        <i class="fa fa-times text-muted"></i>
+                                    </span>
                                     <button type="submit" class="btn btn-primary btn-lg" id="basic-addon2">Search</button>
                                 </div>
                             </form>
@@ -33,7 +39,7 @@
                             <!-- Department Tags -->
                             <div class="gap-2 d-flex flex-wrap justify-content-center">
                                 @foreach ($departments as $department)
-                                    <a href="{{ route('resources.filter',['department' => $department->id]) }}"
+                                    <a href="{{ route('resources.filter', ['department' => $department->id]) }}"
                                         class="btn btn-tag btn-sm">{{ $department->name }}</a>
                                 @endforeach
                             </div>
@@ -49,7 +55,8 @@
                 <div class=".animate-marquee-2 d-flex gap-3">
                     @for ($i = 0; $i < 2; $i++)
                         @foreach ($data as $mentor)
-                            <a href="#!" class="bg-white text-center shadow-sm text-wrap rounded-4 w-100 border card-lift border"
+                            <a href="#!"
+                                class="bg-white text-center shadow-sm text-wrap rounded-4 w-100 border card-lift border"
                                 style="width: 200px !important">
                                 <div class="p-3">
                                     <img src="{{ $mentor->image }}" alt="{{ $mentor->name }}"

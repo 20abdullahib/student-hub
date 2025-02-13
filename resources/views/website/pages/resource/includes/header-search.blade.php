@@ -1,11 +1,18 @@
 <form id="search-form" class="mb-3 position-relative">
     @csrf
     <div class="input-group">
-        <input type="text" id="resource-search" class="form-control"
+        <!-- Input Field -->
+        <input type="text" id="resource-search" class="form-control ps-3 pe-4"
             placeholder="Search by code or name of subject">
+        <!-- Clear Icon Inside Input -->
+        <span class="position-absolute top-50 translate-middle-y end-0 me-3 d-none" style="z-index: 10; cursor: pointer;"
+            id="clear-resource-search">
+            <i class="fa fa-times text-muted"></i>
+        </span>
+        <!-- Search Button -->
         <button type="submit" class="btn btn-primary">Search</button>
     </div>
-    {{-- <div id="resource-suggestions-container" class="position-absolute w-75"></div> --}}
+    <!-- Suggestions Container -->
     <div id="resource-suggestions-container" class="suggestions-container position-absolute"></div>
 </form>
 <div class="row g-3 mb-4">

@@ -16,17 +16,18 @@
                         Search Results for "<span id="search-query">{{ request()->query('query') }}</span>"
                     </h3>
                 @endif
-                
-                <div id="results-container" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"></div>
+
+                <div id="results-container"
+                    class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"></div>
                 <!-- Dropbox Files -->
-                <div class="container mt-5">
+                <!-- Dropbox Files -->
+                <div class="container mt-5" id="static-resources">
                     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
                         @foreach ($subjects as $subject)
                             <div class="col">
                                 <div class="card folder-card h-100 text-center p-4">
                                     <!-- Folder Icon -->
                                     <i class="bi bi-folder-fill display-4 text-primary"></i>
-
                                     <!-- Card Body -->
                                     <div class="card-body">
                                         <h5 class="card-title">{{ $subject->name }}</h5>
@@ -46,6 +47,7 @@
                         {{ $subjects->links() }}
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

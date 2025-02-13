@@ -18,41 +18,95 @@ $(function () {
     const $departmentFilter = $("#department-filter");
     const $branchFilter = $("#branch-filter");
     const $sortFilter = $("#sort-filter");
+    // Cache the static data container (fixed data) – make sure this id is added in your Blade template.
+    const $staticResources = $("#static-resources");
+
+    // Variable for debouncing the input event
+    let debounceTimer;
+
+    // Get references to the input field and the clear icon
+    const searchInput = document.getElementById("resource-search");
+    const clearIcon = document.getElementById("clear-resource-search");
+
+    // --- Helper Functions ---
+    // Function to toggle the visibility of the clear icon
+    function toggleClearIcon() {
+        if (searchInput.value.trim() !== "") {
+            clearIcon.classList.remove("d-none"); // Show the clear icon
+        } else {
+            clearIcon.classList.add("d-none"); // Hide the clear icon
+        }
+    }
+
+    // Add event listener to show/hide the clear icon based on input value
+    searchInput.addEventListener("input", toggleClearIcon);
+
+    // Add event listener to clear the input field when the clear icon is clicked
+    clearIcon.addEventListener("click", function () {
+        searchInput.value = ""; // Clear the input field
+        toggleClearIcon(); // Hide the clear icon after clearing
+        displaySearchResults([]);
+    });
 
     /**
      * Display search or filter results.
+     * If results exist, hide the fixed data and display AJAX results.
+     * If no results, show the fixed data again.
      * @param {Array} data - Array of subject objects.
      */
     const displaySearchResults = (data) => {
         $resultsContainer.empty();
-        if (data && data.length) {
+        if (data && data.length > 0) {
+            // Hide the fixed (static) resources if AJAX returns results.
+            $staticResources.hide();
+
             data.forEach((subject) => {
                 const subjectName = subject.name || "No Name Provided";
                 const subjectDescription = subject.description || "";
-                const subjectId = subject.id || "#"; 
+                const subjectId = subject.id || "#";
 
                 const resultItem = `
-                <div class="col">
-                    <div class="card folder-card h-100 text-center p-4">
-                        <!-- Folder Icon -->
-                        <i class="bi bi-folder-fill display-4 text-primary"></i>
-                        <!-- Card Body -->
-                        <div class="card-body">
-                            <h5 class="card-title">${subjectName}</h5>
-                            <p class="card-text">
-                                ${subjectDescription}
-                            </p>
-                            <!-- Open Button -->
-                            <a href="/resources/subjects/${subjectId}" class="btn btn-primary">Open</a>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            $resultsContainer.append(resultItem);
+              <div class="col">
+                  <div class="card folder-card h-100 text-center p-4">
+                      <!-- Folder Icon -->
+                      <i class="bi bi-folder-fill display-4 text-primary"></i>
+                      <!-- Card Body -->
+                      <div class="card-body">
+                          <h5 class="card-title">${subjectName}</h5>
+                          <p class="card-text">
+                              ${subjectDescription}
+                          </p>
+                          <!-- Open Button -->
+                          <a href="/resources/subjects/${subjectId}" class="btn btn-primary">Open</a>
+                      </div>
+                  </div>
+              </div>
+              `;
+                $resultsContainer.append(resultItem);
             });
+
+            // If many items (e.g. 30 or more), add a placeholder for pagination controls.
+            if (data.length >= 30) {
+                const paginationControls = `
+              <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mt-3">
+                  <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                  </li>
+                  <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                  <li class="page-item"><a class="page-link" href="#">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#">3</a></li>
+                  <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                  </li>
+                </ul>
+              </nav>`;
+                $resultsContainer.append(paginationControls);
+            }
         } else {
-            $resultsContainer.html("<p>No results found</p>");
+            // No AJAX results: show a message and reveal the fixed resources.
+            // $resultsContainer.html("<p>No results found, displaying default resources.</p>");
+            $staticResources.show();
         }
     };
 
@@ -116,14 +170,13 @@ $(function () {
                 if (data && data.length) {
                     data.forEach((subject) => {
                         const subjectName = subject.name || "No Name Provided";
-                        const $suggestionItem = $(
-                            `<div class="suggestion-item p-2 bg-light border"></div>`
-                        );
-                        $suggestionItem.html(
-                            `<strong>${subjectName}</strong> (${
-                                subject.code || ""
-                            })`
-                        );
+                        const $suggestionItem = $(`
+                          <div class="suggestion-item p-2 bg-light border">
+                              <strong>${subjectName}</strong> (${
+                            subject.code || ""
+                        })
+                          </div>
+                      `);
                         $resourceSuggestionsContainer.append($suggestionItem);
 
                         // When a suggestion is clicked, fill the search input and perform a live search.
@@ -148,16 +201,22 @@ $(function () {
 
     // --- Event Handlers for Resource Search ---
 
-    // Live search: update suggestions and results as the user types.
+    // Live search with debouncing: update suggestions and results as the user types.
     $resourceSearch.on("input", function () {
+        clearTimeout(debounceTimer);
         const query = $(this).val().trim();
-        if (query) {
-            fetchSearchSuggestions(query);
-            fetchLiveSearchResults(query);
-        } else {
-            $resourceSuggestionsContainer.empty();
-            $resultsContainer.empty();
-        }
+
+        debounceTimer = setTimeout(() => {
+            if (query) {
+                fetchSearchSuggestions(query);
+                fetchLiveSearchResults(query);
+            } else {
+                $resourceSuggestionsContainer.empty();
+                $resultsContainer.empty();
+                // Show the fixed (static) data if search input is cleared.
+                $staticResources.show();
+            }
+        }, 300); // Adjust delay (in milliseconds) as needed.
     });
 
     // Handle search form submission.
@@ -175,7 +234,7 @@ $(function () {
         .add($sortFilter)
         .on("change", fetchFilteredResults);
 
-    // Hide suggestions when clicking outside the search or suggestion areas.
+    // Hide suggestions (and cancel pending AJAX calls) when clicking outside the search or suggestion areas.
     $(document).on("click", function (event) {
         if (
             !$(event.target).closest(
@@ -183,6 +242,7 @@ $(function () {
             ).length
         ) {
             hideSuggestions();
+            clearTimeout(debounceTimer);
         }
     });
 
