@@ -26,7 +26,7 @@
                                         oninput="toggleClearIcon()">
                                     <!-- Clear Icon Inside Input -->
                                     <span class="position-absolute top-50 translate-middle-y end-0 me-3 d-none"
-                                        style="z-index: 10; cursor: pointer;" id="clear-home-search" onclick="clearSearch()">
+                                        style="z-index: 5; cursor: pointer;" id="clear-home-search" onclick="clearSearch()">
                                         <i class="fa fa-times text-muted"></i>
                                     </span>
                                     <button type="submit" class="btn btn-primary btn-lg" id="basic-addon2">Search</button>
@@ -34,7 +34,7 @@
                             </form>
 
                             <!-- Suggestions Box -->
-                            <div id="home-suggestions-container" class="suggestions-container"></div>
+                            <div id="home-suggestions-container" class="suggestions-container" style="z-index: 1;"></div>
 
                             <!-- Department Tags -->
                             <div class="gap-2 d-flex flex-wrap justify-content-center">

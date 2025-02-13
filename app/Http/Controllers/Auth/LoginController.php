@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
 use App\Models\Admin;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\Models\Branch;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 class LoginController extends Controller
 {
@@ -44,7 +45,8 @@ class LoginController extends Controller
 
     public function showLoginForm()
     {
-        return view('auth.login');
+        $branches = Branch::all();
+        return view('auth.login', compact('branches'));
     }
 
     public function login(Request $request)

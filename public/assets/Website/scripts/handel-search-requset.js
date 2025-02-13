@@ -28,25 +28,28 @@ $(function () {
     const searchInput = document.getElementById("resource-search");
     const clearIcon = document.getElementById("clear-resource-search");
 
-    // --- Helper Functions ---
-    // Function to toggle the visibility of the clear icon
-    function toggleClearIcon() {
-        if (searchInput.value.trim() !== "") {
-            clearIcon.classList.remove("d-none"); // Show the clear icon
-        } else {
-            clearIcon.classList.add("d-none"); // Hide the clear icon
+    // Check if the elements exist to ensure this runs only on the resources page
+    if (searchInput && clearIcon) {
+        // --- Helper Functions ---
+        // Function to toggle the visibility of the clear icon
+        function toggleClearIcon() {
+            if (searchInput.value.trim() !== "") {
+                clearIcon.classList.remove("d-none"); // Show the clear icon
+            } else {
+                clearIcon.classList.add("d-none"); // Hide the clear icon
+            }
         }
+
+        // Add event listener to show/hide the clear icon based on input value
+        searchInput.addEventListener("input", toggleClearIcon);
+
+        // Add event listener to clear the input field when the clear icon is clicked
+        clearIcon.addEventListener("click", function () {
+            searchInput.value = ""; // Clear the input field
+            toggleClearIcon(); // Hide the clear icon after clearing
+            displaySearchResults([]);
+        });
     }
-
-    // Add event listener to show/hide the clear icon based on input value
-    searchInput.addEventListener("input", toggleClearIcon);
-
-    // Add event listener to clear the input field when the clear icon is clicked
-    clearIcon.addEventListener("click", function () {
-        searchInput.value = ""; // Clear the input field
-        toggleClearIcon(); // Hide the clear icon after clearing
-        displaySearchResults([]);
-    });
 
     /**
      * Display search or filter results.

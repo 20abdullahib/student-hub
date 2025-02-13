@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('dropbox_accounts', function (Blueprint $table) {
             $table->id();
             $table->string('email');
-            $table->string('client_id');
-            $table->string('client_secret');
+            $table->string('client_id')->unique();
+            $table->string('client_secret')->unique();
             $table->string('access_token')->nullable();
             $table->text('refresh_token');
             $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null')->onUpdate('set null');
