@@ -1,205 +1,224 @@
-// jQuery code for live search, filtering, and suggestions
+/**
+ * handel-search-requset.js
+ * -------------------------
+ * This file handles all AJAX requests and live search functionality
+ * for the resource search page. It includes functions for:
+ *   - Displaying search results and suggestions.
+ *   - Fetching live search results and filtered results.
+ *   - Updating the URL query parameters and search header.
+ *
+ * All AJAX-related functions are consolidated here to avoid duplication.
+ */
+
 $(function () {
     // Cache frequently used selectors
-    const $searchInput = $('#resource-search');
-    const $suggestionsContainer = $('#resource-suggestions-container');
-    const $resultsContainer = $('#results-container');
-    const $filterForm = $('#filter-form');
-  
+    const $resourceSearch = $("#resource-search");
+    const $resourceSuggestionsContainer = $("#resource-suggestions-container");
+    const $resultsContainer = $("#results-container");
+    const $departmentFilter = $("#department-filter");
+    const $branchFilter = $("#branch-filter");
+    const $sortFilter = $("#sort-filter");
+
     /**
-     * Displays search/filter results.
-     * Uses a fallback for the subject name if undefined.
+     * Display search or filter results.
      * @param {Array} data - Array of subject objects.
      */
     const displaySearchResults = (data) => {
-      $resultsContainer.empty();
-  
-      if (data.length > 0) {
-        data.forEach((subject) => {
-          // Use a fallback if subject.name is undefined or falsy
-          const subjectName = subject.name || 'No Name Provided';
-  
-          const resultItem = `
-            <div class="col-md-4 mb-4">
-              <div class="card h-100">
-                <div class="card-header">
-                  <h5 class="card-title">${subjectName}</h5>
-                </div>
-                <div class="card-body px-0">
-                  <div class="embed-responsive embed-responsive-16by9 mb-3 px-1">
-                    <i class="bi bi-folder-fill text-warning" style="font-size: 6rem; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;"></i>
-                  </div>
-                  <div class="px-3">
-                    <div class="tags-container mb-3">
-                      <a href="#" class="btn btn-outline-primary btn-sm me-1 mb-1" style="pointer-events: none;">tags</a>
+        $resultsContainer.empty();
+        if (data && data.length) {
+            data.forEach((subject) => {
+                const subjectName = subject.name || "No Name Provided";
+                const subjectDescription = subject.description || "";
+                const subjectId = subject.id || "#"; 
+
+                const resultItem = `
+                <div class="col">
+                    <div class="card folder-card h-100 text-center p-4">
+                        <!-- Folder Icon -->
+                        <i class="bi bi-folder-fill display-4 text-primary"></i>
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <h5 class="card-title">${subjectName}</h5>
+                            <p class="card-text">
+                                ${subjectDescription}
+                            </p>
+                            <!-- Open Button -->
+                            <a href="/resources/subjects/${subjectId}" class="btn btn-primary">Open</a>
+                        </div>
                     </div>
-                    <button class="btn btn-primary position-relative see-details" data-storage-path="${subject.storage_path}">
-                      <i class="bi bi-info-circle"></i> See Details
-                    </button>
-                  </div>
                 </div>
-              </div>
-            </div>
-          `;
-          $resultsContainer.append(resultItem);
-        });
-      } else {
-        $resultsContainer.html('<p>No results found</p>');
-      }
+            `;
+
+            $resultsContainer.append(resultItem);
+            });
+        } else {
+            $resultsContainer.html("<p>No results found</p>");
+        }
     };
-  
+
     /**
-     * Fetches live search results based on the query.
+     * Common AJAX helper to get search suggestions.
+     * @param {string} query - The search term.
+     * @returns {JQuery.jqXHR} - jQuery AJAX promise.
+     */
+    function getSearchSuggestions(query) {
+        return $.ajax({
+            url: "/resources/search",
+            type: "GET",
+            data: { query },
+        });
+    }
+
+    /**
+     * Fetch live search results and display them.
      * @param {string} query - The search term.
      */
     const fetchLiveSearchResults = (query) => {
-      $.ajax({
-        url: '/resources/search', // Adjust route if needed
-        type: 'GET',
-        data: { query },
-        success: displaySearchResults,
-        error: () => {
-          $resultsContainer.html('<p>Error fetching search results</p>');
-        },
-      });
+        $.ajax({
+            url: "/resources/search",
+            type: "GET",
+            data: { query },
+            success: displaySearchResults,
+            error: () => {
+                $resultsContainer.html("<p>Error fetching search results</p>");
+            },
+        });
     };
-  
+
     /**
-     * Fetches filtered results.
+     * Fetch filtered results based on selected filters.
      */
     const fetchFilteredResults = () => {
-      const department = $('#department-filter').val();
-      const branch = $('#branch-filter').val();
-      const sort = $('#sort-filter').val();
-  
-      $.ajax({
-        url: '/resources/filter', // Adjust route if needed
-        type: 'GET',
-        data: { department, branch, sort },
-        success: displaySearchResults,
-        error: () => {
-          $resultsContainer.html('<p>Error fetching filtered results</p>');
-        },
-      });
+        const department = $departmentFilter.val();
+        const branch = $branchFilter.val();
+        const sort = $sortFilter.val();
+        $.ajax({
+            url: "/resources/filter",
+            type: "GET",
+            data: { department, branch, sort },
+            success: displaySearchResults,
+            error: () => {
+                $resultsContainer.html(
+                    "<p>Error fetching filtered results</p>"
+                );
+            },
+        });
     };
-  
+
     /**
-     * Fetches search suggestions as the user types.
+     * Fetch and display search suggestions for resource search.
      * @param {string} query - The search term.
      */
     const fetchSearchSuggestions = (query) => {
-      $.ajax({
-        url: '/resources/suggestions',
-        type: 'GET',
-        data: { query },
-        success: (data) => {
-          $suggestionsContainer.empty();
-  
-          if (data.length > 0) {
-            data.forEach((subject) => {
-              // Use fallback for the subject name if undefined
-              const subjectName = subject.name || 'No Name Provided';
-              const $suggestionItem = $(
-                '<div class="suggestion-item p-2 bg-light border"></div>'
-              );
-              $suggestionItem.html(`<strong>${subjectName}</strong> (${subject.code})`);
-              $suggestionsContainer.append($suggestionItem);
-  
-              // Click on a suggestion fills the search input and triggers a search
-              $suggestionItem.on('click', () => {
-                $searchInput.val(subjectName);
-                $suggestionsContainer.empty();
-                fetchLiveSearchResults(subjectName);
-              });
+        getSearchSuggestions(query)
+            .done((data) => {
+                $resourceSuggestionsContainer.empty();
+                if (data && data.length) {
+                    data.forEach((subject) => {
+                        const subjectName = subject.name || "No Name Provided";
+                        const $suggestionItem = $(
+                            `<div class="suggestion-item p-2 bg-light border"></div>`
+                        );
+                        $suggestionItem.html(
+                            `<strong>${subjectName}</strong> (${
+                                subject.code || ""
+                            })`
+                        );
+                        $resourceSuggestionsContainer.append($suggestionItem);
+
+                        // When a suggestion is clicked, fill the search input and perform a live search.
+                        $suggestionItem.on("click", () => {
+                            $resourceSearch.val(subjectName);
+                            $resourceSuggestionsContainer.empty();
+                            fetchLiveSearchResults(subjectName);
+                        });
+                    });
+                } else {
+                    $resourceSuggestionsContainer.html(
+                        "<p>No suggestions found</p>"
+                    );
+                }
+            })
+            .fail(() => {
+                $resourceSuggestionsContainer.html(
+                    "<p>Error fetching suggestions</p>"
+                );
             });
-          } else {
-            $suggestionsContainer.html('<p>No suggestions found</p>');
-          }
-        },
-        error: () => {
-          $suggestionsContainer.html('<p>Error fetching suggestions</p>');
-        },
-      });
     };
-  
-    // --- Event Handlers ---
-  
-    // Live search: fetch suggestions and search results on input
-    $searchInput.on('input', function () {
-      const query = $(this).val();
-      if (query.length > 0) {
-        fetchSearchSuggestions(query);
-        fetchLiveSearchResults(query);
-      } else {
-        $suggestionsContainer.empty();
-        $resultsContainer.empty();
-      }
+
+    // --- Event Handlers for Resource Search ---
+
+    // Live search: update suggestions and results as the user types.
+    $resourceSearch.on("input", function () {
+        const query = $(this).val().trim();
+        if (query) {
+            fetchSearchSuggestions(query);
+            fetchLiveSearchResults(query);
+        } else {
+            $resourceSuggestionsContainer.empty();
+            $resultsContainer.empty();
+        }
     });
-  
-    // Handle search form submission
-    $('#search-form').on('submit', function (e) {
-      e.preventDefault();
-      const query = $searchInput.val();
-      if (query) {
-        fetchLiveSearchResults(query);
-      }
+
+    // Handle search form submission.
+    $("#search-form").on("submit", function (e) {
+        e.preventDefault();
+        const query = $resourceSearch.val().trim();
+        if (query) {
+            fetchLiveSearchResults(query);
+        }
     });
-  
-    // Trigger filtering when any filter option changes
-    $('#department-filter, #branch-filter, #sort-filter').on('change', () => {
-      fetchFilteredResults();
+
+    // Trigger filtering when any filter option changes.
+    $departmentFilter
+        .add($branchFilter)
+        .add($sortFilter)
+        .on("change", fetchFilteredResults);
+
+    // Hide suggestions when clicking outside the search or suggestion areas.
+    $(document).on("click", function (event) {
+        if (
+            !$(event.target).closest(
+                "#resource-search, #resource-suggestions-container"
+            ).length
+        ) {
+            hideSuggestions();
+        }
     });
-  
-    // Hide suggestions when clicking outside the search or suggestion areas
-    $(document).on('click', function (event) {
-      if (
-        !$(event.target).closest(
-          '#resource-search, #resource-suggestions-container, #home-search, #home-suggestions-container'
-        ).length
-      ) {
-        hideSuggestions();
-      }
+
+    // Update URL query parameter and search header text as the user types.
+    $resourceSearch.on("input", function () {
+        const query = $(this).val().trim();
+        const newUrl = new URL(window.location);
+        const searchHeader = document.getElementById("search-header");
+        const searchQuerySpan = document.getElementById("search-query");
+        const noResultsQuerySpan = document.getElementById(
+            "search-query-no-results"
+        );
+
+        if (query) {
+            newUrl.searchParams.set("query", query);
+            window.history.replaceState(null, "", newUrl);
+            if (searchHeader) {
+                searchHeader.style.display = "block";
+                if (searchQuerySpan) searchQuerySpan.textContent = query;
+                if (noResultsQuerySpan) noResultsQuerySpan.textContent = query;
+            }
+        } else {
+            newUrl.searchParams.delete("query");
+            window.history.replaceState(null, "", newUrl);
+            if (searchHeader) {
+                searchHeader.style.display = "none";
+            }
+        }
     });
-  });
-  
-  /**
-   * Hides search suggestions for both resource and home suggestions.
-   */
-  function hideSuggestions() {
-    $('#resource-suggestions-container').empty();
-    $('#home-suggestions-container').empty();
-  }
-  
-  // Plain JavaScript code for updating the URL and search header based on the input
-  document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('resource-search');
-    const searchHeader = document.getElementById('search-header');
-    const searchQuerySpan = document.getElementById('search-query');
-    const noResultsQuerySpan = document.getElementById('search-query-no-results');
-  
-    if (!searchInput) {
-      console.warn('Search input element with id "resource-search" not found.');
-      return;
-    }
-  
-    // Update URL query parameter and header text as the user types
-    searchInput.addEventListener('input', () => {
-      const query = searchInput.value;
-      const newUrl = new URL(window.location);
-  
-      if (query) {
-        newUrl.searchParams.set('query', query);
-        window.history.replaceState(null, '', newUrl);
-  
-        searchHeader.style.display = 'block';
-        searchQuerySpan.textContent = query;
-        noResultsQuerySpan.textContent = query;
-      } else {
-        newUrl.searchParams.delete('query');
-        window.history.replaceState(null, '', newUrl);
-  
-        searchHeader.style.display = 'none';
-      }
-    });
-  });
-  
+
+    // Expose the AJAX helper for use in other scripts.
+    window.getSearchSuggestions = getSearchSuggestions;
+});
+
+// Global function to hide suggestion containers.
+function hideSuggestions() {
+    $("#resource-suggestions-container").empty();
+    $("#home-suggestions-container").empty();
+}

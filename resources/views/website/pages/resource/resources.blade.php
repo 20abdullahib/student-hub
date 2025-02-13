@@ -2,10 +2,6 @@
 
 @section('title', 'Resources')
 
-@section('custom-css')
-
-
-
 @section('content')
     <div class="container my-4">
         <div class="card">
@@ -20,7 +16,8 @@
                         Search Results for "<span id="search-query">{{ request()->query('query') }}</span>"
                     </h3>
                 @endif
-
+                
+                <div id="results-container" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"></div>
                 <!-- Dropbox Files -->
                 <div class="container mt-5">
                     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
@@ -54,7 +51,7 @@
     </div>
 @endsection
 
-@section('scripts')
+@section('custom-scripts')
     <!-- Fluid Player -->
     <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
     <!-- jQuery and Bootstrap JS -->

@@ -44,11 +44,17 @@
                             <label for="subject" class="form-label">Select Subject</label>
                             <select id="subject" name="subject_id" class="form-select" required>
                                 <option value="" disabled selected>Select a subject</option>
-                                @foreach ($subjects as $subject)
-                                    @if ($subject->department_id == $admin->department_id)
+                                @if ($admin->role == 'admin' || $admin->role == 'super admin')
+                                    @foreach ($subjects as $subject)
                                         <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                                    @endif
-                                @endforeach
+                                    @endforeach
+                                @else
+                                    @foreach ($subjects as $subject)
+                                        @if ($subject->department_id == $admin->department_id)
+                                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                        @endif
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
 

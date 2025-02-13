@@ -249,11 +249,8 @@ Route::prefix('about-teem')->group(function () {
 
 Route::prefix('resources')->group(function () {
     Route::get('/', [ResourcesController::class, 'index'])->name('resources.index');
-    Route::get('/suggestions', [ResourcesController::class, 'getSuggestions']);
     Route::get('/search', [ResourcesController::class, 'search'])->name('resources.search');
     Route::get('/filter', [ResourcesController::class, 'filterData'])->name('resources.filter');
-    Route::get('/filter/{department}/{branch?}', [ResourcesController::class, 'filterDataDepartmentBranch'])
-        ->name('resources.filter.departmentbranch');
 
     Route::get('/file/download/{fileId}', [ResourcesController::class, 'download'])->name('file.download');
     Route::get('/file/preview/{fileId}', [ResourcesController::class, 'preview'])->name('file.preview');

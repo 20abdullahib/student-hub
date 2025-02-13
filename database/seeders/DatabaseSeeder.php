@@ -2,16 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Subject;
 use App\Models\User;
 use App\Models\Admin;
 use App\Models\Branch;
+use App\Models\Subject;
 use App\Models\Department;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Generation;
 use Faker\Factory as Faker;
 use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
+use Database\Seeders\BranchSubjectSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -135,5 +136,13 @@ class DatabaseSeeder extends Seeder
             'role' => 'super admin',
         ]);
         $admin->assignRole('super admin');
+
+        /**         
+         * =========================================================
+         * |       Seed Braches and Subjects into the database    |
+         * =========================================================
+         **/
+
+         $this->call(BranchSubjectSeeder::class);
     }
 }

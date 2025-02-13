@@ -161,32 +161,20 @@ class ResourcesController extends Controller
     }
 
     /**
-     * Return subject suggestions based on a query.
-     */
-    public function getSuggestions(Request $request)
-    {
-        $query = $request->input('query');
-        $subjects = Subject::where('name', 'LIKE', "%{$query}%")
-            ->orWhere('code', 'LIKE', "%{$query}%")
-            ->get(['name', 'code']);
-
-        return response()->json($subjects);
-    }
-
-    /**
-     * Search subjects by name or code.
+     * Search subjects by name or code and return suggestions if requested.
      */
     public function search(Request $request)
     {
         $query = $request->input('query');
-        $subjects = Subject::where('name', 'LIKE', "%{$query}%")
-            ->orWhere('code', 'LIKE', "%{$query}%")
-            ->get();
+        $subjectsQuery = Subject::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('code', 'LIKE', "%{$query}%");
 
         if ($request->expectsJson()) {
+            $subjects = $subjectsQuery->get();
             return response()->json($subjects);
         }
 
+        $subjects = $subjectsQuery->paginate(30);
         $departments = DB::table('departments')->get();
         $branches    = DB::table('branches')->get();
 
@@ -198,6 +186,10 @@ class ResourcesController extends Controller
      */
     public function filterData(Request $request)
     {
+        if (!$request->filled('department') && !$request->filled('branch') && !$request->filled('sort')) {
+            return 0;
+        }
+
         $query = Subject::query();
 
         if ($request->filled('department')) {
@@ -205,9 +197,20 @@ class ResourcesController extends Controller
         }
 
         if ($request->filled('branch')) {
-            $query->whereHas('branches', function ($q) use ($request) {
-                $q->where('branch_id', $request->branch);
+            $query->whereIn('id', function ($subQuery) use ($request) {
+                $subQuery->select('subject_id')
+                    ->from('branch_subject')
+                    ->where('branch_id', $request->branch);
             });
+        }
+
+        if ($request->filled('department') && $request->filled('branch')) {
+            $query->where('department_id', $request->department)
+                ->whereIn('id', function ($subQuery) use ($request) {
+                    $subQuery->select('subject_id')
+                        ->from('branch_subject')
+                        ->where('branch_id', $request->branch);
+                });
         }
 
         if ($request->filled('sort')) {
@@ -218,37 +221,14 @@ class ResourcesController extends Controller
 
         if ($request->ajax()) {
             return response()->json($subjects);
+        }else{
+            $subjects = $query->paginate(30);
         }
 
         $departments = DB::table('departments')->get();
         $branches    = DB::table('branches')->get();
 
         return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches'));
-    }
-
-    /**
-     * Filter subjects by department and optional branch.
-     *
-     * @param int $department
-     * @param int|null $branch
-     */
-    public function filterDataDepartmentBranch(int $department, ?int $branch = null)
-    {
-        $departmentData = Department::findOrFail($department);
-        $departments    = DB::table('departments')->get();
-        $branches       = DB::table('branches')->get();
-        $subjects       = collect();
-
-        if ($branch) {
-            $branchData = $departmentData->branches()->findOrFail($branch);
-            $subjects   = $branchData->subjects;
-            $query      = $departmentData->branches()->where('id', $branch)->pluck('name')->first();
-        } else {
-            $subjects = Subject::where('department_id', $department)->get();
-            $query    = $departmentData->name;
-        }
-
-        return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches', 'query'));
     }
 
     /**

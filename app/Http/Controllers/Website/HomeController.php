@@ -15,11 +15,11 @@ class HomeController extends Controller
         $data = [];
 
         $departments = DB::table('departments')->get();
-
+        $branches = DB::table('branches')->get();
         foreach ($generations->take(10) as $generation) {
             $data[] = $generation;
         }
-        return view('website.pages.home', compact('data', 'departments'));
+        return view('website.pages.home', compact('data', 'departments', 'branches'));
     }
  
 }

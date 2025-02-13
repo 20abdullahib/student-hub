@@ -20,8 +20,7 @@ class Branch extends Model
         return $this->belongsTo(Department::class);
     }
     public function subjects()
-{
-    return $this->belongsToMany(Subject::class, 'branch_subject');
-}
-
+    {
+        return $this->belongsToMany(Subject::class, 'branch_subject');
+    }
 }
