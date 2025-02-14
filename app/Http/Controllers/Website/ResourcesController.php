@@ -169,12 +169,15 @@ class ResourcesController extends Controller
         $subjectsQuery = Subject::where('name', 'LIKE', "%{$query}%")
             ->orWhere('code', 'LIKE', "%{$query}%");
 
+        $subjects = $subjectsQuery->paginate(20);
+        // If the request expects JSON (AJAX), return JSON data with pagination links
         if ($request->expectsJson()) {
-            $subjects = $subjectsQuery->get();
-            return response()->json($subjects);
+            return response()->json([
+                'data' => $subjects->items(),
+                'pagination' => $subjects->links('pagination::bootstrap-4')->render()
+            ]);
         }
 
-        $subjects = $subjectsQuery->paginate(30);
         $departments = DB::table('departments')->get();
         $branches    = DB::table('branches')->get();
 
@@ -217,13 +220,14 @@ class ResourcesController extends Controller
             $query->orderBy('created_at', $request->sort === 'Newest' ? 'desc' : 'asc');
         }
 
-        $subjects = $query->get();
+        $subjects = $query->paginate(20);
 
         if ($request->ajax()) {
-            return response()->json($subjects);
-        }else{
-            $subjects = $query->paginate(30);
-        }
+            return response()->json([
+                'data' => $subjects->items(),
+                'pagination' => $subjects->links('pagination::bootstrap-4')->render()
+            ]);
+        } 
 
         $departments = DB::table('departments')->get();
         $branches    = DB::table('branches')->get();

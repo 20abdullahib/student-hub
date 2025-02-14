@@ -2,11 +2,11 @@
     @csrf
     <div class="input-group">
         <!-- Input Field -->
-        <input type="text" id="resource-search" class="form-control ps-3 pe-4"
+        <input type="text" id="resource-search" oninput="toggleClearIcon('resource-search','clear-resource-search')" class="form-control ps-3 pe-4"
             placeholder="Search by code or name of subject">
         <!-- Clear Icon Inside Input -->
         <span class="position-absolute top-50 translate-middle-y end-0 me-3 d-none" style="z-index: 10; cursor: pointer;"
-            id="clear-resource-search">
+            id="clear-resource-search" onclick ="clearSearch('resource-search','clear-resource-search')">
             <i class="fa fa-times text-muted"></i>
         </span>
         <!-- Search Button -->

@@ -7,7 +7,6 @@
  *   - Modal display handling.
  *   - Randomized animation durations for marquee elements.
  *   - Live search suggestions for home and header search fields that redirect to search results.
- *   - Typed.js initialization for homepage animations.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -140,35 +139,6 @@ $(document).ready(() => {
     });
 });
 
-function toggleClearIcon() {
-    const searchInput = document.getElementById("home-search");
-    const clearIcon = document.getElementById("clear-home-search");
-    if (searchInput.value.length > 0) {
-        clearIcon.classList.remove("d-none");
-    } else {
-        clearIcon.classList.add("d-none");
-    }
-}
 
-function clearSearch() {
-    const searchInput = document.getElementById("home-search");
-    searchInput.value = "";
-    toggleClearIcon();
-}
 
-// ============================================
-// Typed.js Initialization for Homepage
-// ============================================
-document.addEventListener("DOMContentLoaded", () => {
-    if (typeof Typed !== "undefined") {
-        new Typed("#typed-strings", {
-            strings: ["Support You", "Shorten Time", "Gain Skills", "Have Fun"],
-            typeSpeed: 100, // milliseconds per character
-            backSpeed: 50, // milliseconds per character
-            backDelay: 1000, // delay before backspacing
-            startDelay: 500, // delay before typing starts
-            loop: true, // loop typing effect
-            showCursor: true, // display the blinking cursor
-        });
-    }
-});
+

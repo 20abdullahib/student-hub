@@ -47,6 +47,7 @@
                         {{ $subjects->links() }}
                     </div>
                 </div>
+                <div id="pageinit-container"></div>
 
             </div>
         </div>
@@ -54,9 +55,9 @@
 @endsection
 
 @section('custom-scripts')
-    <!-- Fluid Player -->
+    {{-- <!-- Fluid Player -->
     <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
     <!-- jQuery and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script> --}}
 @endsection

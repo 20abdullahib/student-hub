@@ -23,10 +23,10 @@
                                     <input type="text" id="home-search" class="form-control form-control-lg"
                                         placeholder="Search by code or name of subject"
                                         aria-label="Search by code or name of subject" aria-describedby="basic-addon2"
-                                        oninput="toggleClearIcon()">
+                                        oninput="toggleClearIcon('home-search', 'clear-home-search')">
                                     <!-- Clear Icon Inside Input -->
                                     <span class="position-absolute top-50 translate-middle-y end-0 me-3 d-none"
-                                        style="z-index: 5; cursor: pointer;" id="clear-home-search" onclick="clearSearch()">
+                                        style="z-index: 5; cursor: pointer;" id="clear-home-search" onclick="clearSearch('home-search','clear-home-search')">
                                         <i class="fa fa-times text-muted"></i>
                                     </span>
                                     <button type="submit" class="btn btn-primary btn-lg" id="basic-addon2">Search</button>

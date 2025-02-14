@@ -15,6 +15,7 @@ $(function () {
     const $resourceSearch = $("#resource-search");
     const $resourceSuggestionsContainer = $("#resource-suggestions-container");
     const $resultsContainer = $("#results-container");
+    const $pageinitContainer = $("#pageinit-container");
     const $departmentFilter = $("#department-filter");
     const $branchFilter = $("#branch-filter");
     const $sortFilter = $("#sort-filter");
@@ -25,93 +26,64 @@ $(function () {
     let debounceTimer;
 
     // Get references to the input field and the clear icon
-    const searchInput = document.getElementById("resource-search");
     const clearIcon = document.getElementById("clear-resource-search");
 
     // Check if the elements exist to ensure this runs only on the resources page
-    if (searchInput && clearIcon) {
-        // --- Helper Functions ---
-        // Function to toggle the visibility of the clear icon
-        function toggleClearIcon() {
-            if (searchInput.value.trim() !== "") {
-                clearIcon.classList.remove("d-none"); // Show the clear icon
-            } else {
-                clearIcon.classList.add("d-none"); // Hide the clear icon
-            }
-        }
-
-        // Add event listener to show/hide the clear icon based on input value
-        searchInput.addEventListener("input", toggleClearIcon);
-
+    if (clearIcon) {
         // Add event listener to clear the input field when the clear icon is clicked
         clearIcon.addEventListener("click", function () {
-            searchInput.value = ""; // Clear the input field
-            toggleClearIcon(); // Hide the clear icon after clearing
             displaySearchResults([]);
         });
     }
 
     /**
-     * Display search or filter results.
-     * If results exist, hide the fixed data and display AJAX results.
-     * If no results, show the fixed data again.
-     * @param {Array} data - Array of subject objects.
-     */
-    const displaySearchResults = (data) => {
-        $resultsContainer.empty();
-        if (data && data.length > 0) {
-            // Hide the fixed (static) resources if AJAX returns results.
-            $staticResources.hide();
+ * Display search or filter results with pagination.
+ * Expects response: { data: [subject objects], pagination: "<pagination HTML>" }
+ * @param {Object} response - The AJAX response.
+ */
+const displaySearchResults = (response) => {
+    const data = response.data;
+    const pagination = response.pagination;
 
-            data.forEach((subject) => {
-                const subjectName = subject.name || "No Name Provided";
-                const subjectDescription = subject.description || "";
-                const subjectId = subject.id || "#";
+    $resultsContainer.empty();
+    $pageinitContainer.empty();
+    if (data && data.length > 0) {
+        // Hide the fixed (static) resources if AJAX returns results.
+        $staticResources.hide();
 
-                const resultItem = `
+        data.forEach((subject) => {
+            const subjectName = subject.name || "No Name Provided";
+            const subjectDescription = subject.description || "";
+            const subjectId = subject.id || "#";
+
+            const resultItem = `
               <div class="col">
                   <div class="card folder-card h-100 text-center p-4">
-                      <!-- Folder Icon -->
                       <i class="bi bi-folder-fill display-4 text-primary"></i>
-                      <!-- Card Body -->
                       <div class="card-body">
                           <h5 class="card-title">${subjectName}</h5>
-                          <p class="card-text">
-                              ${subjectDescription}
-                          </p>
-                          <!-- Open Button -->
+                          <p class="card-text">${subjectDescription}</p>
                           <a href="/resources/subjects/${subjectId}" class="btn btn-primary">Open</a>
                       </div>
                   </div>
-              </div>
-              `;
-                $resultsContainer.append(resultItem);
-            });
+              </div>`;
+            $resultsContainer.append(resultItem);
+        });
 
-            // If many items (e.g. 30 or more), add a placeholder for pagination controls.
-            if (data.length >= 30) {
-                const paginationControls = `
-              <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mt-3">
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Previous</a>
-                  </li>
-                  <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">Next</a>
-                  </li>
-                </ul>
-              </nav>`;
-                $resultsContainer.append(paginationControls);
-            }
-        } else {
-            // No AJAX results: show a message and reveal the fixed resources.
-            // $resultsContainer.html("<p>No results found, displaying default resources.</p>");
-            $staticResources.show();
+        // Append the pagination controls (rendered by Laravel) if provided.
+        if (pagination) {
+            const paginationControls = `
+                <div class="d-flex justify-content-center mt-4">
+                    ${pagination}
+                </div>`;
+            $pageinitContainer.append(paginationControls);
         }
-    };
+    } else {
+        // No AJAX results: reveal the fixed (static) resources.
+        $staticResources.show();
+    }
+};
+
 
     /**
      * Common AJAX helper to get search suggestions.
@@ -123,28 +95,32 @@ $(function () {
             url: "/resources/search",
             type: "GET",
             data: { query },
+            dataType: "json",
         });
     }
 
-    /**
-     * Fetch live search results and display them.
-     * @param {string} query - The search term.
-     */
-    const fetchLiveSearchResults = (query) => {
-        $.ajax({
-            url: "/resources/search",
-            type: "GET",
-            data: { query },
-            success: displaySearchResults,
-            error: () => {
-                $resultsContainer.html("<p>Error fetching search results</p>");
-            },
-        });
-    };
+   /**
+ * Fetch live search results and display them.
+ * @param {string} query - The search term.
+ * @param {string} [url="/resources/search"] - Optional URL for pagination.
+ */
+const fetchLiveSearchResults = (query, url = "/resources/search") => {
+    $.ajax({
+        url: url,
+        type: "GET",
+        data: { query },
+        dataType: "json",
+        success: displaySearchResults,
+        error: () => {
+            $resultsContainer.html("<p>Error fetching search results</p>");
+        }
+    });
+};
+
 
     /**
-     * Fetch filtered results based on selected filters.
-     */
+ * Fetch filtered results based on selected filters.
+ */
     const fetchFilteredResults = () => {
         const department = $departmentFilter.val();
         const branch = $branchFilter.val();
@@ -153,14 +129,14 @@ $(function () {
             url: "/resources/filter",
             type: "GET",
             data: { department, branch, sort },
+            dataType: "json",
             success: displaySearchResults,
             error: () => {
-                $resultsContainer.html(
-                    "<p>Error fetching filtered results</p>"
-                );
-            },
+                $resultsContainer.html("<p>Error fetching filtered results</p>");
+            }
         });
     };
+    
 
     /**
      * Fetch and display search suggestions for resource search.
@@ -168,7 +144,8 @@ $(function () {
      */
     const fetchSearchSuggestions = (query) => {
         getSearchSuggestions(query)
-            .done((data) => {
+            .done((response) => {
+                const data = response.data;
                 $resourceSuggestionsContainer.empty();
                 if (data && data.length) {
                     data.forEach((subject) => {
@@ -278,6 +255,15 @@ $(function () {
 
     // Expose the AJAX helper for use in other scripts.
     window.getSearchSuggestions = getSearchSuggestions;
+});
+// Event delegation for pagination links (works for both search and filter results)
+$(document).on("click", ".pagination a", function(e) {
+    e.preventDefault();
+    const url = $(this).attr("href");
+    const query = $resourceSearch.val().trim();
+    if (url) {
+        fetchLiveSearchResults(query, url);
+    }
 });
 
 // Global function to hide suggestion containers.
