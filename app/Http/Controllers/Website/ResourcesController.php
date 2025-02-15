@@ -18,15 +18,13 @@ class ResourcesController extends Controller
      */
     public function index()
     {
-        // Eager load files (ordering them by path) and paginate the subjects.
         $subjects = Subject::with(['files' => function ($query) {
             $query->orderBy('path');
         }])->paginate(30);
 
-        $departments = Department::all();
-        $branches    = Branch::all();
-
-        return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches'));
+        return view('website.pages.resource.resources', array_merge([
+            'subjects' => $subjects,
+        ], $this->getDepartmentAndBranchData()));
     }
 
     /**
@@ -37,29 +35,20 @@ class ResourcesController extends Controller
      */
     public function show(int $id, Request $request)
     {
-        // Load the subject along with its files.
         $subject = Subject::with('files')->findOrFail($id);
-
-        // Build the folder tree (removing the first folder if needed).
         $tree = $this->buildTree($subject->files, true);
 
-        // Determine the current folder path (if any).
         $currentFolderPath = $request->get('folder', '');
         $currentNode       = $this->getCurrentNode($tree, $currentFolderPath);
         $breadcrumbs       = $this->buildBreadcrumbs($subject->id, $currentFolderPath);
 
-        $departments = Department::all();
-        $branches    = Branch::all();
-
-        return view('website.pages.resource.partials.nested-folders', compact(
-            'subject',
-            'tree',
-            'currentNode',
-            'currentFolderPath',
-            'breadcrumbs',
-            'departments',
-            'branches'
-        ));
+        return view('website.pages.resource.partials.nested-folders', array_merge([
+            'subject'           => $subject,
+            'tree'              => $tree,
+            'currentNode'       => $currentNode,
+            'currentFolderPath' => $currentFolderPath,
+            'breadcrumbs'       => $breadcrumbs,
+        ], $this->getDepartmentAndBranchData()));
     }
 
     /**
@@ -72,34 +61,40 @@ class ResourcesController extends Controller
     private function buildTree(Collection $files, bool $removeFirstFolder = false): array
     {
         $tree = [];
+
         foreach ($files as $file) {
             $trimmedPath = trim($file->path, "/ \t\n\r\0\x0B");
+
+            // File is in the root directory.
             if ($trimmedPath === '') {
-                // File is in the root directory.
                 $tree['_files'][] = $file;
-            } else {
-                $parts = explode('/', $trimmedPath);
-
-                if ($removeFirstFolder && count($parts) > 0) {
-                    array_shift($parts);
-                }
-
-                // If no folder remains or just one part remains, treat the file as in the root.
-                if (count($parts) === 0 || count($parts) === 1) {
-                    $tree['_files'][] = $file;
-                } else {
-                    // Traverse or create the nested folder structure.
-                    $folderParts = array_slice($parts, 0, -1);
-                    $current     = &$tree;
-                    foreach ($folderParts as $folder) {
-                        if (!isset($current[$folder])) {
-                            $current[$folder] = [];
-                        }
-                        $current = &$current[$folder];
-                    }
-                    $current['_files'][] = $file;
-                }
+                continue;
             }
+
+            $parts = explode('/', $trimmedPath);
+
+            if ($removeFirstFolder && count($parts) > 0) {
+                array_shift($parts);
+            }
+
+            // If no folder remains or just one part remains, treat the file as in the root.
+            if (count($parts) <= 1) {
+                $tree['_files'][] = $file;
+                continue;
+            }
+
+            // Build nested folder structure.
+            $folderParts = array_slice($parts, 0, -1);
+            $current = &$tree;
+
+            foreach ($folderParts as $folder) {
+                if (!isset($current[$folder])) {
+                    $current[$folder] = [];
+                }
+                $current = &$current[$folder];
+            }
+
+            $current['_files'][] = $file;
         }
 
         return $tree;
@@ -115,9 +110,9 @@ class ResourcesController extends Controller
     private function getCurrentNode(array $tree, string $folderPath): array
     {
         $current = $tree;
+
         if ($folderPath !== '') {
-            $parts = explode('/', $folderPath);
-            foreach ($parts as $part) {
+            foreach (explode('/', $folderPath) as $part) {
                 if (isset($current[$part])) {
                     $current = $current[$part];
                 } else {
@@ -141,18 +136,17 @@ class ResourcesController extends Controller
         $breadcrumbs = [
             [
                 'label' => 'Resources',
-                'url'   => route('resources.index', $subjectId)
-            ]
+                'url'   => route('resources.index', $subjectId),
+            ],
         ];
 
         if ($folderPath !== '') {
-            $parts       = explode('/', $folderPath);
             $accumulated = '';
-            foreach ($parts as $part) {
+            foreach (explode('/', $folderPath) as $part) {
                 $accumulated .= ($accumulated ? '/' : '') . $part;
                 $breadcrumbs[] = [
                     'label' => $part,
-                    'url'   => route('resources.subjects.show', $subjectId) . '?folder=' . urlencode($accumulated)
+                    'url'   => route('resources.subjects.show', $subjectId) . '?folder=' . urlencode($accumulated),
                 ];
             }
         }
@@ -165,23 +159,23 @@ class ResourcesController extends Controller
      */
     public function search(Request $request)
     {
-        $query = $request->input('query');
-        $subjectsQuery = Subject::where('name', 'LIKE', "%{$query}%")
-            ->orWhere('code', 'LIKE', "%{$query}%");
+        $queryInput = $request->input('query');
 
-        $subjects = $subjectsQuery->paginate(20);
-        // If the request expects JSON (AJAX), return JSON data with pagination links
+        $subjects = Subject::where('name', 'LIKE', "%{$queryInput}%")
+            ->orWhere('code', 'LIKE', "%{$queryInput}%")
+            ->paginate(20);
+
         if ($request->expectsJson()) {
             return response()->json([
-                'data' => $subjects->items(),
-                'pagination' => $subjects->links('pagination::bootstrap-4')->render()
+                'data'       => $subjects->items(),
+                'pagination' => $subjects->links('pagination::bootstrap-4')->render(),
             ]);
         }
 
-        $departments = DB::table('departments')->get();
-        $branches    = DB::table('branches')->get();
-
-        return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches', 'query'));
+        return view('website.pages.resource.resources', array_merge([
+            'subjects' => $subjects,
+            'query'    => $queryInput,
+        ], $this->getDepartmentAndBranchData()));
     }
 
     /**
@@ -189,6 +183,7 @@ class ResourcesController extends Controller
      */
     public function filterData(Request $request)
     {
+        // No filters provided.
         if (!$request->filled('department') && !$request->filled('branch') && !$request->filled('sort')) {
             return 0;
         }
@@ -207,32 +202,23 @@ class ResourcesController extends Controller
             });
         }
 
-        if ($request->filled('department') && $request->filled('branch')) {
-            $query->where('department_id', $request->department)
-                ->whereIn('id', function ($subQuery) use ($request) {
-                    $subQuery->select('subject_id')
-                        ->from('branch_subject')
-                        ->where('branch_id', $request->branch);
-                });
-        }
-
         if ($request->filled('sort')) {
-            $query->orderBy('created_at', $request->sort === 'Newest' ? 'desc' : 'asc');
+            $sortDirection = $request->sort === 'Newest' ? 'desc' : 'asc';
+            $query->orderBy('created_at', $sortDirection);
         }
 
         $subjects = $query->paginate(20);
 
         if ($request->ajax()) {
             return response()->json([
-                'data' => $subjects->items(),
-                'pagination' => $subjects->links('pagination::bootstrap-4')->render()
+                'data'       => $subjects->items(),
+                'pagination' => $subjects->links('pagination::bootstrap-4')->render(),
             ]);
-        } 
+        }
 
-        $departments = DB::table('departments')->get();
-        $branches    = DB::table('branches')->get();
-
-        return view('website.pages.resource.resources', compact('subjects', 'departments', 'branches'));
+        return view('website.pages.resource.resources', array_merge([
+            'subjects' => $subjects,
+        ], $this->getDepartmentAndBranchData()));
     }
 
     /**
@@ -271,5 +257,18 @@ class ResourcesController extends Controller
         }
 
         return "https://www.dropbox.com/scl/fi/{$file->file_id}?rlkey={$file->rlkey}&e=1&dl={$downloadFlag}";
+    }
+
+    /**
+     * Retrieve common data for departments and branches.
+     *
+     * @return array
+     */
+    private function getDepartmentAndBranchData(): array
+    {
+        return [
+            'departments' => Department::all(),
+            'branches'    => Branch::all(),
+        ];
     }
 }

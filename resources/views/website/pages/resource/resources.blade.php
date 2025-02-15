@@ -13,13 +13,12 @@
                 <!-- Optional: Display search query results header -->
                 @if (request()->filled('query'))
                     <h3 id="search-header">
-                        Search Results for "<span id="search-query">{{ request()->query('query') }}</span>"
+                        {{-- Search Results for "<span id="search-query">{{ request()->query('query') }}</span>" --}}
                     </h3>
                 @endif
 
                 <div id="results-container"
                     class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"></div>
-                <!-- Dropbox Files -->
                 <!-- Dropbox Files -->
                 <div class="container mt-5" id="static-resources">
                     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
@@ -48,7 +47,6 @@
                     </div>
                 </div>
                 <div id="pageinit-container"></div>
-
             </div>
         </div>
     </div>
