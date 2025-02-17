@@ -78,7 +78,7 @@ $(function () {
               <div class="card-body">
                 <h5 class="card-title">${subjectName}</h5>
                 <p class="card-text">${subjectDescription}</p>
-                <a href="/resources/subjects/${subjectId}" class="btn btn-primary">Open</a>
+                <a href="/resources/${subjectId}" class="btn btn-primary">Open</a>
               </div>
             </div>
           </div>`;

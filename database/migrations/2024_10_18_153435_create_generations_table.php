@@ -15,11 +15,8 @@ return new class extends Migration
             $table->id();  // Primary key
             $table->string('name');  // Name field
             $table->integer('year_joined');  // Year the generation joined
-            $table->foreignId('branch_id')  // Foreign key to branches table
-                ->nullable()
-                ->constrained('branches')
-                ->onDelete('set null')
-                ->onUpdate('cascade');  // Cascade on delete and update
+            $table->integer('patch');
+            $table->foreignId('branch_id')->nullable()->constrained('branches')->onDelete('set null')->onUpdate('cascade');  // Cascade on delete and update
             $table->string('image')->default('person_icon.png');  // Image field with default value
             $table->boolean('publish')->default(false);  // Public home field with default value false
             $table->string('role');  // Role field

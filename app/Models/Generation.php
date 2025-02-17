@@ -12,7 +12,7 @@ class Generation extends Model
 
     public $timestamps = true;
 
-    protected $fillable = ['name', 'year_joined', 'branch_id'];
+    protected $fillable = ['name', 'year_joined', 'branch_id','patch', 'image', 'publish', 'role'];
 
     // Define relationship to Branch
     public function branch()

@@ -78,6 +78,7 @@ class DatabaseSeeder extends Seeder
         $peoplePerYear = 10;
         $branchIds = range(1, 18); // Assuming you have 18 branches
         $roles = ['OC', 'IT', 'HR', 'BR']; // Define roles
+        $patchNumber = 1; 
 
         $faker = Faker::create();
 
@@ -90,8 +91,10 @@ class DatabaseSeeder extends Seeder
                     'image' => 'https://codescandy.com/geeks-bootstrap-5/assets/images/mentor/mentor-img-' . $faker->numberBetween(1, 8) . '.jpg', // Adding image link
                     'role' => $faker->randomElement($roles), // Adding random role
                     'publish' => $faker->numberBetween(0, 1), // Adding random publish value
+                    'patch' => $patchNumber, // Assign the patch number
                 ]);
             }
+            $patchNumber++;
         }
 
         /**         

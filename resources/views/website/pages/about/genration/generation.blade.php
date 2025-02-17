@@ -9,7 +9,7 @@
         <div class="d-flex flex-wrap gap-4 justify-content-center px-5 py-lg-4 pt-4">
             @foreach ($generations as $student)
                 <div class="d-flex gap-3">
-                    <a href="#" class="bg-white text-center shadow-sm text-wrap rounded-4 w-100 border card-lift border"
+                    <a class="bg-white text-center shadow-sm text-wrap rounded-4 w-100 border card-lift border"
                         style="width: 230px !important; height: 226px;">
                         <div class="p-3">
                             <img src="{{ $student->image }}" alt="{{ $student->name }}"

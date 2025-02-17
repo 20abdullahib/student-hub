@@ -19,7 +19,8 @@ class AboutController extends Controller
             ->orderBy('year_joined', 'asc')
             ->get()
             ->pluck('year_joined');  // Get distinct years
-        $generations = Generation::with('branch')->get();  // Fetch generations with branch relationship
+        // $generations = Generation::with('branch')->get();  // Fetch generations with branch relationship
+        $generations = Generation::get();  
         // dd($generations);
         $branches = Branch::get();
 
@@ -30,8 +31,9 @@ class AboutController extends Controller
     {
         $generations = Generation::where('year_joined', $year)->get();
         // dd($generation);
+        $branches = Branch::get();
 
-        return view('website.pages.about.genration.generation', compact('generations'));
+        return view('website.pages.about.genration.generation', compact('generations', 'branches'));
     }
 
     public function getSuggestions(Request $request)
