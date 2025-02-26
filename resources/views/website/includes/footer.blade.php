@@ -11,8 +11,7 @@
                                 class="logo-reverse" />
                         </div>
                         <div>
-                            <p class="mb-0 txet-gray-500">Connecting founders and marketers with battle-hardened mentors
-                                that genuinely enjoy helping people.</p>
+                            <p class="mb-0 text-gray-500">Connecting students with experienced mentors to help them achieve their academic and career goals.</p>
                         </div>
                         <!-- Instagram -->
                         <div class="fs-4 d-flex flex-row gap-3">
@@ -53,13 +52,13 @@
                 <div class="col-lg-2 col-md-3 col-6">
                     <div class="d-flex flex-column gap-2">
                         <!-- list -->
-                        <h5 class="fw-bold text-white text-uppercase mb-0">Platform</h5>
-                        <ul class="list-unstyled nav nav-footer flex-column nav-x-0">
+                        <h5 class="fw-bold text-white text-uppercase mb-0">Social</h5>
+                        {{-- <ul class="list-unstyled nav nav-footer flex-column nav-x-0">
                             <li><a href="#" class="nav-link">Browse Mentors</a></li>
                             <li><a href="#" class="nav-link">Book a Session</a></li>
                             <li><a href="#" class="nav-link">Become a Mentor</a></li>
                             <li><a href="#" class="nav-link">Wall Of love</a></li>
-                        </ul>
+                        </ul> --}}
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-6">
@@ -67,23 +66,18 @@
                         <!-- list -->
                         <h5 class="fw-bold text-white text-uppercase mb-0">Resources</h5>
                         <ul class="list-unstyled nav nav-footer flex-column nav-x-0">
-                            <li><a href="#" class="nav-link">Newsletter</a></li>
-                            <li><a href="#" class="nav-link">Case Studies</a></li>
-                            <li><a href="#" class="nav-link">Books</a></li>
-                            <li><a href="#" class="nav-link">Templates</a></li>
-                            <li><a href="#" class="nav-link">Blog</a></li>
+                            <li><a href="{{route('resources.index')}}" class="nav-link">All Resources</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-6">
                     <div class="d-flex flex-column gap-2">
                         <!-- list -->
-                        <h5 class="fw-bold text-white text-uppercase mb-0">Company</h5>
+                        <h5 class="fw-bold text-white text-uppercase mb-0">Team</h5>
                         <ul class="list-unstyled nav nav-footer flex-column nav-x-0">
-                            <li><a href="#" class="nav-link">About</a></li>
-                            <li><a href="#" class="nav-link">Partner Program</a></li>
-                            <li><a href="#" class="nav-link">Privacy Policy</a></li>
-                            <li><a href="#" class="nav-link">Meet the Team</a></li>
+                            <li><a href="{{route('about.index')}}" class="nav-link">About</a></li>
+                            <li><a href="{{route('about.index')}}" class="nav-link">Meet the Team</a></li>
+                            <li><a href="{{route('login')}}" class="nav-link">Login</a></li>
                         </ul>
                     </div>
                 </div>
@@ -110,7 +104,7 @@
                                 document.getElementById("copyright2").appendChild(document.createTextNode(new Date().getFullYear()));
                             </script>
                         </span>
-                        Geeks-UI Mentor. All Rights Reserved.
+                        Magic-Team Mentor. All Rights Reserved.
                     </span>
                 </div>
             </div>
