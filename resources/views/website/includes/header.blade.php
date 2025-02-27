@@ -121,7 +121,7 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tools</a>
                         <ul class="dropdown-menu">
-                            <li class="dropdown">
+                            {{-- <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Research</a>
                                 <ul class="dropdown-menu">
                                     <li><a href="#">Custom Menu</a></li>
@@ -131,7 +131,7 @@
                             </li>
                             <li><a href="#">Custom Menu</a></li>
                             <li><a href="#">Custom Menu</a></li>
-                            <li><a href="#">Custom Menu</a></li>
+                            <li><a href="#">Custom Menu</a></li> --}}
                         </ul>
                     </li>
                     <li id="contact-link"><a href="">Contact Us</a></li>
