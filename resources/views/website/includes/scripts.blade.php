@@ -15,6 +15,6 @@
 <script src="{{asset('assets/Website/scripts/handel-search-requset.js') }}"></script>
 
 
-@foreach (glob(public_path('assets/Website/scripts/components/*.js')) as $file)
-    <script src="{{ asset('assets/Website/scripts/components/' . basename($file)) }}"></script>
-@endforeach
+<script src="{{ asset('assets/Website/scripts/components/input-clear-handler.js') }}"></script>
+
+<script src="{{ asset('assets/Website/scripts/components/type.js') }}"></script>
