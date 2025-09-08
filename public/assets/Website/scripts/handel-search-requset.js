@@ -515,12 +515,89 @@ $(function () {
     window.hideSuggestions = function () {
         $("#resource-suggestions-container").removeClass('show').hide();
         $("#home-suggestions-container").removeClass('show').hide();
-        $("#header-suggestions-container").removeClass('show').hide();
+        $("#header-suggestions-container").hide(); // Header uses simple hide
     };
 
     // ------------------------------------------------------
     // Home and Header Search Suggestions Functionality
     // ------------------------------------------------------
+    
+    /**
+     * Fetch and display improved search suggestions for the home search input.
+     *
+     * @param {string} query - The search term.
+     * @param {jQuery} $container - The suggestions container element.
+     */
+    const fetchImprovedHomeSuggestions = (query, $container) => {
+        $.ajax({
+            url: "/resources/suggestions",
+            type: "GET",
+            data: { query: query },
+            dataType: "json",
+            success: function(response) {
+                $container.empty();
+                
+                // Check if response has data
+                if (response && response.data && response.data.length > 0) {
+                    response.data.slice(0, 5).forEach((subject, index) => {
+                        const subjectName = subject.name || "No Name";
+                        const subjectCode = subject.code || "";
+                        const isLast = index === Math.min(response.data.length - 1, 4);
+                        
+                        const suggestionHtml = `
+                            <div class="suggestion-item p-3 ${!isLast ? 'border-bottom' : ''}" 
+                                 style="cursor: pointer; transition: all 0.2s ease; background-color: white; border-color: #e9ecef;">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-folder-fill text-primary me-3" style="font-size: 1.1rem;"></i>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold text-dark mb-1" style="font-size: 0.95rem;">${subjectName}</div>
+                                        ${subjectCode ? `<small class="text-muted">${subjectCode}</small>` : ''}
+                                    </div>
+                                    <i class="bi bi-arrow-right text-muted ms-2" style="font-size: 0.8rem; opacity: 0.6;"></i>
+                                </div>
+                            </div>
+                        `;
+                        
+                        const $suggestionItem = $(suggestionHtml);
+                        $container.append($suggestionItem);
+
+                        // Enhanced hover effects
+                        $suggestionItem.on("mouseenter", function() {
+                            $(this).css({
+                                "background-color": "#f8f9fa",
+                                "transform": "translateX(2px)"
+                            });
+                            $(this).find('.bi-arrow-right').css('opacity', '1');
+                        }).on("mouseleave", function() {
+                            $(this).css({
+                                "background-color": "white",
+                                "transform": "translateX(0px)"
+                            });
+                            $(this).find('.bi-arrow-right').css('opacity', '0.6');
+                        });
+
+                        // Click handler - redirect to search results page
+                        $suggestionItem.on("click", function() {
+                            $container.removeClass('show').hide();
+                            window.location.href = `/resources/search?query=${encodeURIComponent(subjectName)}`;
+                        });
+                    });
+                    
+                    // Show with smooth animation
+                    $container.addClass('show').show();
+                    
+                } else {
+                    // No suggestions found - hide the container
+                    $container.removeClass('show').hide();
+                }
+            },
+            error: function(xhr, status, error) {
+                // Hide container on error
+                $container.removeClass('show').hide();
+            }
+        });
+    };
+    
     // Define the search inputs and their corresponding suggestion container selectors.
     const homeHeaderSearchInputs = ["home-search", "header-search"];
     const suggestionContainers = {
@@ -534,70 +611,94 @@ $(function () {
         const $suggestionsContainer = $(suggestionContainers[inputId]);
 
         if ($searchInput.length) {
+            let homeDebounceTimer;
+            
             $searchInput.on("input", function () {
+                clearTimeout(homeDebounceTimer);
                 const query = $searchInput.val().trim();
-                if (query.length >= 1) {
-                    // Use the globally exposed AJAX helper.
-                    getSearchSuggestions(query)
-                        .done((response) => {
-                            const data = response.data;
-                            $suggestionsContainer.empty();
-                            if (data && data.length) {
-                                data.forEach((subject) => {
-                                    const subjectName =
-                                        subject.name || "No Name Provided";
-                                    const $suggestionItem = $(`
-                    <div class="suggestion-item p-2 bg-light border">
-                      <strong>${subjectName}</strong> (${subject.code || ""})
-                    </div>
-                  `);
-                                    $suggestionsContainer.append(
-                                        $suggestionItem
-                                    );
-
-                                    // On click: fill the search input, clear suggestions, and redirect.
-                                    $suggestionItem.on("click", () => {
-                                        $searchInput.val(subjectName);
-                                        $suggestionsContainer.empty();
-                                        window.location.href = `/resources/search?query=${encodeURIComponent(
-                                            subjectName
-                                        )}`;
-                                    });
-                                });
-                            } else {
-                                $suggestionsContainer.html(
-                                    "<p>No suggestions found</p>"
-                                );
-                            }
-                        })
-                        .fail(() => {
-                            $suggestionsContainer.html(
-                                "<p>Error fetching suggestions</p>"
-                            );
-                        });
-                } else {
-                    // If the search input is cleared, clear suggestions and show static resources or filtered results.
-                    $suggestionsContainer.empty();
-                    
-                    // Check if any filters are active on the current page
-                    const departmentFilter = $("#department-filter");
-                    const branchFilter = $("#branch-filter");
-                    
-                    if (departmentFilter.length && branchFilter.length) {
-                        const department = departmentFilter.val();
-                        const branch = branchFilter.val();
-                        
-                        if (department || branch) {
-                            fetchFilteredResults();
+                
+                homeDebounceTimer = setTimeout(() => {
+                    if (query.length >= 1) {
+                        // Use improved suggestions for home search, regular for header search
+                        if (inputId === "home-search") {
+                            fetchImprovedHomeSuggestions(query, $suggestionsContainer);
                         } else {
-                            // Show static resources if on resources page
-                            if ($("#static-resources").length) {
-                                $("#results-container").empty();
-                                $("#pageinit-container").empty();
-                                $("#static-resources").show();
+                            // Keep original functionality for header search but fix display issues
+                            getSearchSuggestions(query)
+                                .done((response) => {
+                                    const data = response.data;
+                                    $suggestionsContainer.empty();
+                                    if (data && data.length) {
+                                        data.forEach((subject) => {
+                                            const subjectName = subject.name || "No Name Provided";
+                                            const $suggestionItem = $(`
+                                                <div class="suggestion-item p-2 bg-light border">
+                                                  <strong>${subjectName}</strong> (${subject.code || ""})
+                                                </div>
+                                            `);
+                                            $suggestionsContainer.append($suggestionItem);
+
+                                            // On click: fill the search input, clear suggestions, and redirect.
+                                            $suggestionItem.on("click", () => {
+                                                $searchInput.val(subjectName);
+                                                $suggestionsContainer.empty().hide();
+                                                window.location.href = `/resources/search?query=${encodeURIComponent(subjectName)}`;
+                                            });
+                                        });
+                                        // Show the suggestions container
+                                        $suggestionsContainer.show();
+                                    } else {
+                                        // Hide container when no suggestions found instead of showing message
+                                        $suggestionsContainer.hide();
+                                    }
+                                })
+                                .fail(() => {
+                                    // Hide container on error instead of showing error message
+                                    $suggestionsContainer.hide();
+                                });
+                        }
+                    } else {
+                        // If the search input is empty, hide suggestions
+                        if (inputId === "home-search") {
+                            $suggestionsContainer.removeClass('show').hide();
+                        } else {
+                            // For header search, just hide normally
+                            $suggestionsContainer.hide();
+                        }
+                        
+                        // Check if any filters are active on the current page
+                        const departmentFilter = $("#department-filter");
+                        const branchFilter = $("#branch-filter");
+                        
+                        if (departmentFilter.length && branchFilter.length) {
+                            const department = departmentFilter.val();
+                            const branch = branchFilter.val();
+                            
+                            if (department || branch) {
+                                fetchFilteredResults();
+                            } else {
+                                // Show static resources if on resources page
+                                if ($("#static-resources").length) {
+                                    $("#results-container").empty();
+                                    $("#pageinit-container").empty();
+                                    $("#static-resources").show();
+                                }
                             }
                         }
                     }
+                }, 300); // Debounce for better UX
+            });
+            
+            // Hide suggestions when clicking outside
+            $(document).on("click", function (event) {
+                if (!$(event.target).closest(`#${inputId}, ${suggestionContainers[inputId]}`).length) {
+                    if (inputId === "home-search") {
+                        $suggestionsContainer.removeClass('show').hide();
+                    } else {
+                        // For header search, just hide normally
+                        $suggestionsContainer.hide();
+                    }
+                    clearTimeout(homeDebounceTimer);
                 }
             });
         }

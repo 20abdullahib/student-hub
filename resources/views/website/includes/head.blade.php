@@ -89,6 +89,44 @@
     left: 0 !important;
 }
 
+/* Specific styling for home suggestions container */
+#home-suggestions-container {
+    background-color: white !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 8px !important;
+    z-index: 9999 !important;
+    position: absolute !important;
+    width: 100% !important;
+    top: calc(100% + 2px) !important;
+    left: 0 !important;
+}
+
+/* Specific styling for header suggestions container */
+#header-suggestions-container {
+    /* background-color: white !important; */
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 4px !important;
+    /* z-index: 9999 !important; */
+    /* position: absolute !important; */
+    width: 100% !important;
+    top: calc(100% + 2px) !important;
+    left: 0 !important;
+    max-height: 250px !important;
+    /* overflow-y: auto !important; */
+    /* box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; */
+    display: none; /* Hidden by default */
+}
+
+/* Ensure header search container has relative positioning */
+.top-search .container {
+    position: relative !important;
+}
+
+/* Header search input group positioning */
+.top-search .input-group {
+    position: relative !important;
+}
+
 /* Animation for showing/hiding */
 .suggestions-container.show {
     display: block;

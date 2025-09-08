@@ -19,7 +19,7 @@
                         <div class="d-flex flex-column gap-3">
                             <form id="search-form" onsubmit="return false;">
                                 @csrf
-                                <div class="input-group mb-3 position-relative">
+                                <div class="input-group mb-3 position-relative search-container">
                                     <input type="text" id="home-search" class="form-control form-control-lg"
                                         placeholder="Search by code or name of subject"
                                         aria-label="Search by code or name of subject" aria-describedby="basic-addon2"
@@ -30,11 +30,11 @@
                                         <i class="fa fa-times text-muted"></i>
                                     </span>
                                     <button type="submit" class="btn btn-primary btn-lg" id="basic-addon2">Search</button>
+                                    
+                                    <!-- Suggestions Box -->
+                                    <div id="home-suggestions-container" class="suggestions-container"></div>
                                 </div>
                             </form>
-
-                            <!-- Suggestions Box -->
-                            <div id="home-suggestions-container" class="suggestions-container" style="z-index: 1;"></div>
 
                             <!-- Department Tags -->
                             <div class="gap-2 d-flex flex-wrap justify-content-center">
