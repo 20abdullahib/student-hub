@@ -16,7 +16,7 @@
     <div id="resource-suggestions-container" class="suggestions-container position-absolute"></div>
 </form>
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <select id="department-filter" class="form-select">
             <option value="">Department</option>
             @foreach ($departments as $department)
@@ -24,7 +24,7 @@
             @endforeach
         </select>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
         <select id="branch-filter" class="form-select">
             <option value="">Branches</option>
             @foreach ($branches as $branch)
@@ -32,11 +32,4 @@
             @endforeach
         </select>
     </div>
-    {{-- <div class="col-md-4">
-        <select id="sort-filter" class="form-select">
-            <option value="">Sort</option>
-            <option value="Newest">Newest</option>
-            <option value="Oldest">Oldest</option>
-        </select>
-    </div> --}}
 </div>

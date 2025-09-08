@@ -21,30 +21,43 @@
                     class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"></div>
                 <!-- Dropbox Files -->
                 <div class="container mt-5" id="static-resources">
-                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
-                        @foreach ($subjects as $subject)
-                            <div class="col">
-                                <div class="card folder-card h-100 text-center p-4">
-                                    <!-- Folder Icon -->
-                                    <i class="bi bi-folder-fill display-4 text-primary"></i>
-                                    <!-- Card Body -->
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ $subject->name }}</h5>
-                                        <p class="card-text">
-                                            {{ $subject->description ?? 'No description available.' }}
-                                        </p>
-                                        <!-- Open Button -->
-                                        <a href="{{ route('resources.subjects.show', $subject->id) }}"
-                                            class="btn btn-primary">Open</a>
+                    @if($subjects->count() > 0)
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+                            @foreach ($subjects as $subject)
+                                @if($subject->files->count() > 0)
+                                    <div class="col">
+                                        <div class="card folder-card h-100 text-center p-4">
+                                            <!-- Folder Icon -->
+                                            <i class="bi bi-folder-fill display-4 text-primary"></i>
+                                            <!-- Card Body -->
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ $subject->name }}</h5>
+                                                <p class="card-text">
+                                                    {{ $subject->description ?? 'No description available.' }}
+                                                </p>
+                                                <p class="card-text small text-muted">
+                                                    {{ $subject->files_count ?? $subject->files->count() }} file(s) available
+                                                </p>
+                                                <!-- Open Button -->
+                                                <a href="{{ route('resources.subjects.show', $subject->id) }}"
+                                                    class="btn btn-primary">Open</a>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                    <!-- Pagination Links -->
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $subjects->links() }}
-                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                        <!-- Pagination Links -->
+                        <div class="d-flex justify-content-center mt-4">
+                            {{ $subjects->links() }}
+                        </div>
+                    @else
+                        <div class="text-center py-5">
+                            <i class="bi bi-folder-x display-1 text-muted"></i>
+                            <h4 class="mt-3">No Resources Found</h4>
+                            <p class="text-muted">No subjects with files are available at the moment.</p>
+                        </div>
+                    @endif
                 </div>
                 <div id="pageinit-container"></div>
             </div>

@@ -18,9 +18,7 @@ class ResourcesController extends Controller
      */
     public function index()
     {
-        $subjects = Subject::with(['files' => function ($query) {
-            $query->orderBy('path');
-        }])->paginate(30);
+        $subjects = $this->getSubjectsQuery()->paginate(30);
 
         return view('website.pages.resource.resources', array_merge([
             'subjects' => $subjects,
@@ -159,66 +157,62 @@ class ResourcesController extends Controller
      */
     public function search(Request $request)
     {
-        $queryInput = $request->input('query');
+        $query = $request->input('query', '');
+        
+        $subjects = $this->getSubjectsQuery($query)->paginate(20);
 
-        $subjects = Subject::where('name', 'LIKE', "%{$queryInput}%")
-            ->orWhere('code', 'LIKE', "%{$queryInput}%")
-            ->paginate(20);
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'data'       => $subjects->items(),
-                'pagination' => $subjects->links('pagination::bootstrap-4')->render(),
-            ]);
-        }
-
-        return view('website.pages.resource.resources', array_merge([
-            'subjects' => $subjects,
-            'query'    => $queryInput,
-        ], $this->getDepartmentAndBranchData()));
+        return $this->handleResponse($request, $subjects, ['query' => $query]);
     }
 
     /**
-     * Filter subjects based on department, branch, and sort options.
+     * Get search suggestions for autocomplete.
      */
-    public function filterData(Request $request)
+    public function suggestions(Request $request)
     {
-        // No filters provided.
-        if (!$request->filled('department') && !$request->filled('branch') && !$request->filled('sort')) {
-            return 0;
-        }
-
-        $query = Subject::query();
-
-        if ($request->filled('department')) {
-            $query->where('department_id', $request->department);
-        }
-
-        if ($request->filled('branch')) {
-            $query->whereIn('id', function ($subQuery) use ($request) {
-                $subQuery->select('subject_id')
-                    ->from('branch_subject')
-                    ->where('branch_id', $request->branch);
-            });
-        }
-
-        if ($request->filled('sort')) {
-            $sortDirection = $request->sort === 'Newest' ? 'desc' : 'asc';
-            $query->orderBy('created_at', $sortDirection);
-        }
-
-        $subjects = $query->paginate(20);
-
-        if ($request->ajax()) {
+        $query = $request->input('query', '');
+        
+        if (empty($query)) {
+            // For testing, return some subjects even without query
+            $subjects = Subject::whereHas('files')
+                ->select('id', 'name', 'code', 'description')
+                ->limit(5)
+                ->get();
+                
             return response()->json([
-                'data'       => $subjects->items(),
-                'pagination' => $subjects->links('pagination::bootstrap-4')->render(),
+                'data' => $subjects,
+                'count' => $subjects->count(),
+                'message' => 'No query provided - showing sample subjects'
             ]);
         }
 
-        return view('website.pages.resource.resources', array_merge([
-            'subjects' => $subjects,
-        ], $this->getDepartmentAndBranchData()));
+        $subjects = Subject::where(function($q) use ($query) {
+            $q->where('name', 'LIKE', "%{$query}%")
+              ->orWhere('code', 'LIKE', "%{$query}%");
+        })
+        ->whereHas('files')
+        ->select('id', 'name', 'code', 'description')
+        ->limit(10)
+        ->get();
+
+        return response()->json([
+            'data' => $subjects,
+            'count' => $subjects->count(),
+            'query' => $query
+        ]);
+    }
+
+    /**
+     * Filter subjects based on department, branch, and search query.
+     */
+    public function filterData(Request $request)
+    {
+        $subjects = $this->getSubjectsQuery(
+            $request->input('query', ''),
+            $request->input('department'),
+            $request->input('branch')
+        )->paginate(20);
+
+        return $this->handleResponse($request, $subjects);
     }
 
     /**
@@ -270,5 +264,72 @@ class ResourcesController extends Controller
             'departments' => Department::all(),
             'branches'    => Branch::all(),
         ];
+    }
+
+    /**
+     * Build a reusable query for subjects with files.
+     * 
+     * @param string|null $searchQuery
+     * @param string|null $departmentId
+     * @param string|null $branchId
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    private function getSubjectsQuery($searchQuery = null, $departmentId = null, $branchId = null)
+    {
+        $query = Subject::with(['files' => function ($q) {
+            $q->orderBy('path');
+        }])
+        ->whereHas('files')
+        ->withCount('files');
+
+        // Apply search filter
+        if (!empty($searchQuery)) {
+            $query->where(function($q) use ($searchQuery) {
+                $q->where('name', 'LIKE', "%{$searchQuery}%")
+                  ->orWhere('code', 'LIKE', "%{$searchQuery}%");
+            });
+        }
+
+        // Apply department filter
+        if (!empty($departmentId)) {
+            $query->where('department_id', $departmentId);
+        }
+
+        // Apply branch filter
+        if (!empty($branchId)) {
+            $query->whereHas('branches', function($q) use ($branchId) {
+                $q->where('branches.id', $branchId);
+            });
+        }
+
+        // Default sorting by name
+        $query->orderBy('name', 'asc');
+
+        return $query;
+    }
+
+    /**
+     * Handle the response for both AJAX and regular requests.
+     * 
+     * @param Request $request
+     * @param \Illuminate\Contracts\Pagination\LengthAwarePaginator $subjects
+     * @param array $extraData
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\View\View
+     */
+    private function handleResponse(Request $request, $subjects, array $extraData = [])
+    {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'data' => $subjects->items(),
+                'pagination' => $subjects->appends($request->all())->render(),
+                'total' => $subjects->total(),
+                'current_page' => $subjects->currentPage(),
+                'last_page' => $subjects->lastPage(),
+            ]);
+        }
+
+        return view('website.pages.resource.resources', array_merge([
+            'subjects' => $subjects,
+        ], $extraData, $this->getDepartmentAndBranchData()));
     }
 }

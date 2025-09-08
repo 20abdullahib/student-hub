@@ -29,6 +29,7 @@ Route::prefix('about-teem')->group(function () {
 Route::prefix('resources')->group(function () {
     Route::get('/', [ResourcesController::class, 'index'])->name('resources.index');
     Route::get('/search', [ResourcesController::class, 'search'])->name('resources.search');
+    Route::get('/suggestions', [ResourcesController::class, 'suggestions'])->name('resources.suggestions');
     Route::get('/filter', [ResourcesController::class, 'filterData'])->name('resources.filter');
 
     Route::get('/file/download/{fileId}', [ResourcesController::class, 'download'])->name('file.download');
