@@ -290,13 +290,27 @@ class ResourcesController extends Controller
             });
         }
 
-        // Apply department filter
-        if (!empty($departmentId)) {
-            $query->where('department_id', $departmentId);
-        }
+        // Apply department/branch filters
+        // If both department and branch are provided, return subjects that match
+        // either the department OR the branch to avoid overly restrictive AND logic.
+        // Use grouping to prevent duplicate subjects when a subject matches both.
+        if (!empty($departmentId) && !empty($branchId)) {
+            $query->where(function($q) use ($departmentId, $branchId) {
+                $q->where('department_id', $departmentId)
+                  ->orWhereHas('branches', function($q2) use ($branchId) {
+                      $q2->where('branches.id', $branchId);
+                  });
+            });
 
-        // Apply branch filter
-        if (!empty($branchId)) {
+            // Prevent duplicate rows in case of joins
+            $query->groupBy('subjects.id');
+
+        } elseif (!empty($departmentId)) {
+            // Only department provided
+            $query->where('department_id', $departmentId);
+
+        } elseif (!empty($branchId)) {
+            // Only branch provided
             $query->whereHas('branches', function($q) use ($branchId) {
                 $q->where('branches.id', $branchId);
             });
