@@ -8,38 +8,50 @@ use Illuminate\Support\Facades\Log;
 
 class DropboxService
 {
-    public function verifyCredentials(array $credentials): bool
-    {
-        try {
-            $response = Http::asForm()->post('https://api.dropbox.com/oauth2/token', [
+public function verifyCredentials(array $credentials): bool
+{
+    try {
+        $clientId = trim($credentials['client_id']);
+        $clientSecret = trim($credentials['client_secret']);
+        $refreshToken = trim($credentials['refresh_token']);
+
+        $response = Http::withoutVerifying() // <--- Disables cURL SSL certificate check
+            ->asForm()
+            ->withBasicAuth($clientId, $clientSecret)
+            ->post('https://api.dropbox.com/oauth2/token', [
                 'grant_type' => 'refresh_token',
-                'refresh_token' => $credentials['refresh_token'],
-                'client_id' => $credentials['client_id'],
-                'client_secret' => $credentials['client_secret'],
+                'refresh_token' => $refreshToken,
             ]);
 
-            return $response->successful() && $response->json('access_token');
-        } catch (\Exception $e) {
-            Log::error('Dropbox verification failed: ' . $e->getMessage());
+        if (!$response->successful()) {
+            Log::error('Dropbox OAuth verification response error: ' . $response->body());
             return false;
         }
+
+        return !empty($response->json('access_token'));
+    } catch (\Exception $e) {
+        Log::error('Dropbox verification failed: ' . $e->getMessage());
+        return false;
     }
+}
 
     public function refreshAccessToken(DropboxAccount $account): void
     {
         try {
-            $response = Http::asForm()->post('https://api.dropbox.com/oauth2/token', [
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $account->refresh_token,
-                'client_id' => $account->client_id,
-                'client_secret' => $account->client_secret,
-            ]);
+            $response = Http::asForm()
+                ->withBasicAuth($account->client_id, $account->client_secret)
+                ->post('https://api.dropbox.com/oauth2/token', [
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $account->refresh_token,
+                ]);
 
             if ($response->successful()) {
                 $account->update([
                     'access_token' => $response->json('access_token'),
                     'token_expires_at' => now()->addSeconds($response->json('expires_in')),
                 ]);
+            } else {
+                Log::error("Failed to refresh token for account {$account->id}: " . $response->body());
             }
         } catch (\Exception $e) {
             Log::error("Token refresh failed for account {$account->id}: " . $e->getMessage());
@@ -50,16 +62,26 @@ class DropboxService
     {
         if ($this->needsTokenRefresh($account)) {
             $this->refreshAccessToken($account);
+            // Refresh account instance from database to get the new access_token
+            $account->refresh();
         }
     }
 
     private function needsTokenRefresh(DropboxAccount $account): bool
     {
+        // 1. Check database expiration timestamp first (avoids an unnecessary HTTP call)
+        if ($account->token_expires_at && now()->addMinutes(2)->gte($account->token_expires_at)) {
+            return true;
+        }
+
+        // 2. Fallback check against Dropbox check endpoint
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $account->access_token,
                 'Content-Type' => 'application/json',
-            ])->post('https://api.dropboxapi.com/2/check/user', []);
+            ])->post('https://api.dropboxapi.com/2/check/user', [
+                'query' => 'ping'
+            ]);
 
             return !$response->successful();
         } catch (\Exception $e) {
@@ -70,6 +92,8 @@ class DropboxService
 
     public function getAccountFiles(DropboxAccount $account): array
     {
+        $this->ensureValidToken($account);
+
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $account->access_token,
@@ -79,7 +103,7 @@ class DropboxService
             ]);
 
             return $response->successful() 
-                ? $this->formatFiles($response->json()['entries'], $account)
+                ? $this->formatFiles($response->json()['entries'] ?? [], $account)
                 : [];
         } catch (\Exception $e) {
             Log::error("File listing failed: " . $e->getMessage());
@@ -90,14 +114,14 @@ class DropboxService
     private function formatFiles(array $files, DropboxAccount $account): array
     {
         return collect($files)->filter(function ($file) {
-            return $file['.tag'] === 'file';
+            return ($file['.tag'] ?? '') === 'file';
         })->map(function ($file) use ($account) {
             return [
                 'name' => $file['name'],
                 'path' => $file['path_lower'],
                 'link' => $this->getTemporaryLink($account, $file['path_lower']),
             ];
-        })->toArray();
+        })->values()->toArray();
     }
 
     private function getTemporaryLink(DropboxAccount $account, string $filePath): string
