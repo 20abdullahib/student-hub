@@ -43,15 +43,15 @@
                         <div class="form-group mb-4">
                             <label for="subject" class="form-label">Select Subject</label>
                             <select id="subject" name="subject_id" class="form-select" required>
-                                <option value="" disabled selected>Select a subject</option>
+                                <option value="" disabled {{ old('subject_id') ? '' : 'selected' }}>Select a subject</option>
                                 @if ($admin->role == 'admin' || $admin->role == 'super admin')
                                     @foreach ($subjects as $subject)
-                                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                        <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
                                     @endforeach
                                 @else
                                     @foreach ($subjects as $subject)
                                         @if ($subject->department_id == $admin->department_id)
-                                            <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                            <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
                                         @endif
                                     @endforeach
                                 @endif

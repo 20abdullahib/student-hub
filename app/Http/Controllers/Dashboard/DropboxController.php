@@ -64,7 +64,9 @@ class DropboxController extends Controller
         ]);
 
         if (!$this->dropboxService->verifyCredentials($validated)) {
-            return redirect()->back()->with('error', 'Invalid Dropbox credentials');
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Invalid Dropbox credentials');
         }
 
         DropboxAccount::updateOrCreate(

@@ -12,7 +12,7 @@ class SessionTimeout
     /**
      * Timeout period in seconds (e.g., 15 minutes).
      */
-    protected $timeout = 5 * 60; // 15 minutes
+    protected $timeout = 60 * 60; 
     // protected $timeout = 1; // 1s for test
 
 

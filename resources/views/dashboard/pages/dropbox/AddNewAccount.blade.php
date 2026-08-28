@@ -72,7 +72,7 @@
                         <div class="mb-4">
                             <label for="department_id">Assign to Department</label>
                             <select class="form-control @error('department_id') is-invalid @enderror" id="department_id" name="department_id" required>
-                                <option value="" disabled selected>Select a department</option>
+                                <option value="" disabled {{ old('department_id') ? '' : 'selected' }}>Select a department</option>
                                 @foreach ($departments as $department)
                                     <option value="{{ $department->id }}" {{ old('department_id') == $department->id ? 'selected' : '' }}>
                                         {{ $department->name }}
