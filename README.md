@@ -116,7 +116,7 @@ To set up the environment for the project, follow these instructions:
 
 ## Usage
 
-After setting up the environment and running the application, you can start using the web application to manage student activities, collaborate on projects, and share resources.
+After setting up the environment and running the application, you can start using the web application to manage student activities, collaborate on projects, and share resources videos every thing to support students.
 
 ## Contributing
 
